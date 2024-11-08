@@ -5,6 +5,7 @@ urlpatterns = [
     path('', views.home, name='home'),  # Add this line to map the empty path
     path('register/', views.register, name='register'),
     path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
     path('service_list/', views.service_list, name='service_list'),
     path('service/<int:id>/', views.service_detail, name='service_detail'),
     path('book_service/<int:pk>/', views.book_service, name='book_service'),
