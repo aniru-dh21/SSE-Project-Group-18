@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-
 {% block title %}Home - Service Booking Platform{% endblock %}
 
 {% block content %}
@@ -10,26 +9,72 @@
                 <div class="card-body py-5">
                     <h1 class="display-4 mb-4">Welcome to Service Booking</h1>
                     <p class="lead mb-4">Find and book trusted service providers in your area for all your needs.</p>
-                    
+
                     <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
                         {% if user.is_authenticated %}
-                            <a href="{% url 'service_list' %}" class="btn btn-primary btn-lg px-4">
-                                <i class="fas fa-search me-2"></i>Browse Services
-                            </a>
+                            <a href="{% url 'dashboard' %}" class="btn btn-primary btn-lg px-4">Dashboard</a>
+                            <a href="{% url 'service_list' %}" class="btn btn-secondary btn-lg px-4">Browse Services</a>
                         {% else %}
-                            <a href="{% url 'service_list' %}" class="btn btn-primary btn-lg px-4">
-                                <i class="fas fa-search me-2"></i>View Services
-                            </a>
-                            <a href="{% url 'register' %}" class="btn btn-secondary btn-lg px-4">
-                                <i class="fas fa-user-plus me-2"></i>Register
-                            </a>
-                            <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg px-4">
-                                <i class="fas fa-sign-in-alt me-2"></i>Login
-                            </a>
+                            <a href="{% url 'service_list' %}" class="btn btn-primary btn-lg px-4">View Services</a>
+                            <a href="{% url 'register' %}" class="btn btn-secondary btn-lg px-4">Register</a>
+                            <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg px-4">Login</a>
                         {% endif %}
                     </div>
                 </div>
             </div>
+
+            {% if user.is_authenticated %}
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h2 class="h4 mb-3">Quick Actions</h2>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="d-grid">
+                                <a href="{% url 'edit_profile' %}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-person-gear"></i> Edit Profile
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-grid">
+                                <a href="{% url 'recommend_service' %}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-star"></i> Recommended Services
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h2 class="h4 mb-3">Why Choose Us?</h2>
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <i class="bi bi-shield-check fs-1 text-primary mb-2"></i>
+                                <h3 class="h5">Verified Providers</h3>
+                                <p class="small text-muted">All our service providers are thoroughly vetted</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <i class="bi bi-clock fs-1 text-primary mb-2"></i>
+                                <h3 class="h5">Quick Booking</h3>
+                                <p class="small text-muted">Easy and fast booking process</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <i class="bi bi-cash-coin fs-1 text-primary mb-2"></i>
+                                <h3 class="h5">Secure Payments</h3>
+                                <p class="small text-muted">Safe and secure payment processing</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>

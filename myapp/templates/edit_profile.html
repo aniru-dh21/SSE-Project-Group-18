@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Edit Profile{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Edit Profile</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="mobile" class="form-label">Mobile</label>
+                            <input type="text" class="form-control" id="mobile" name="mobile" value="{{ user.mobile }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="country_of_citizenship" class="form-label">Country of Citizenship</label>
+                            <input type="text" class="form-control" id="country_of_citizenship" name="country_of_citizenship" value="{{ user.country_of_citizenship }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="language_preferred" class="form-label">Preferred Language</label>
+                            <input type="text" class="form-control" id="language_preferred" name="language_preferred" value="{{ user.language_preferred }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="profession" class="form-label">Profession</label>
+                            <input type="text" class="form-control" id="profession" name="profession" value="{{ user.profession }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="trade" class="form-label">Trade</label>
+                            <input type="text" class="form-control" id="trade" name="trade" value="{{ user.trade }}">
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="covid_vaccination_status" name="covid_vaccination_status" {% if user.covid_vaccination_status %}checked{% endif %}>
+                                <label class="form-check-label" for="covid_vaccination_status">
+                                    COVID-19 Vaccination Status
+                                </label>
+                            </div>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Update Profile</button>
+                            <a href="{% url 'dashboard' %}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

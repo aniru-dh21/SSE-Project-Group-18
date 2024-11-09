@@ -110,6 +110,43 @@ def recommend_service(request):
     services = Service.objects.order_by('price')[:1]
     return render(request, 'recommend_service.html', {'services': services})
 
+@login_required
+def dashboard(request):
+    user_bookings = Booking.objects.filter(user=request.user).select_related('service')
+    context = {
+        'user': request.user,
+        'bookings': user_bookings
+    }
+    return render(request, 'dashboard.html', context)
+
+@login_required
+def edit_profile(request):
+    if request.method == 'POST':
+        # Sanitize all POST data
+        clean_data = {key: sanitize_input(value)
+                      for key, value in request.POST.items()}
+        
+        # Update user fields
+        user = request.user
+        updateable_fields = [
+            'mobile', 'country_of_citizenship', 'language_preferred',
+            'covid_vaccination_status', 'trade', 'profession'
+        ]
+
+        try:
+            with transaction.atomic():
+                for field in updateable_fields:
+                    if field in clean_data:
+                        setattr(user, field, clean_data[field])
+                user.save()
+                messages.success(request, 'Profile updated successfully!')
+        except Exception as e:
+            messages.error(request, 'An error occurred while updating your profile.')
+        
+        return redirect('dashboard')
+    
+    return render(request, 'edit_profile.html', {'user': request.user})
+
 @login_required  # Ensure that the user is logged in before booking
 def book_service(request, pk):
     service = get_object_or_404(Service, pk=pk)

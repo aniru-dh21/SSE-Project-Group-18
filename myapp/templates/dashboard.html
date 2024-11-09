@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Profile Section -->
+         <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4 class="mb-0">Profile Information</h4>
+                </div>
+                <div class="card-body">
+                    <p><strong>Username:</strong> {{ user.username }}</p>
+                    <p><strong>Mobile:</strong> {{ user.mobile }}</p>
+                    <p><strong>Country:</strong> {{ user.country_of_citizenship }}</p>
+                    <p><strong>Language:</strong> {{ user.language_preferred }}</p>
+                    <p><strong>Profession:</strong> {{ user.profession }}</p>
+                    <p><strong>Trade:</strong> {{ user.trade }}</p>
+                    <p><strong>Vaccination Status:</strong> 
+                        {% if user.covid_vaccination_status %}
+                            Vaccinated
+                        {% else %}
+                            Not Vaccinated
+                        {% endif %}
+                    </p>
+                    <a href="{% url 'edit_profile' %}" class="btn btn-primary">Edit Profile</a>
+                </div>
+            </div>
+         </div>
+
+         <!-- Bookings Section -->
+          <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">My Bookings</h4>
+                </div>
+                <div class="card-body">
+                    {% if bookings %}
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Service</th>
+                                        <th>Date</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for booking in bookings %}
+                                    <tr>
+                                        <td>{{ booking.service.name }}</td>
+                                        <td>{{ booking.booking_date|date:"M d, Y" }}</td>
+                                        <td>${{ booking.amount_paid }}</td>
+                                        <td>
+                                            <span class="badge {% if booking.payment_status == 'Completed' %}bg-success{% else %}bg-warning{% endif %}">
+                                                {{ booking.payment_status }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-center">You haven't made any bookings yet.</p>
+                        <div class="text-center">
+                            <a href="{% url 'service_list' %}" class="btn btn-primary">Browse Services</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+          </div>
+    </div>
+</div>
+{% endblock %}

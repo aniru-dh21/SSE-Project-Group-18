@@ -10,6 +10,8 @@ urlpatterns = [
     path('service/<int:id>/', views.service_detail, name='service_detail'),
     path('book_service/<int:pk>/', views.book_service, name='book_service'),
     path('recommend/', views.recommend_service, name='recommend_service'),
+    path('dashboard/', views.dashboard, name='dashboard'),
+    path('edit_profile/', views.edit_profile, name='edit_profile'),
     
     path('success/', views.success_view, name='success'),
     path('cancel/', views.cancel_view, name='cancel'),
