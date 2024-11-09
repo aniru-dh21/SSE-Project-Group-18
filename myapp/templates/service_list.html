@@ -1,39 +1,48 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Available Services</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-  </head>
-  <body>
-    <div class="container mt-5">
-      <h2 class="text-center mb-4">Available Services</h2>
-      <div class="service-list">
-        {% for service in services %}
-        <div
-          class="service-item d-flex justify-content-between align-items-center mb-3"
-        >
-          <div>
-            <h5>{{ service.name }}</h5>
-            <p>{{ service.short_description }}</p>
-            <p><strong>Price:</strong> ${{ service.price }}</p>
-          </div>
-          <!-- Link to the service detail page -->
-          <a
-            href="{% url 'service_detail' service.id %}"
-            class="btn btn-primary"
-            >View Details</a
-          >
+{% extends "base.html" %}
+
+{% block title %}Available Services - Service Booking Platform{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-center mb-0">Available Services</h2>
+                </div>
+                <div class="card-body">
+                    <div class="service-list">
+                        {% for service in services %}
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h5 class="card-title mb-2">{{ service.name }}</h5>
+                                            <p class="card-text text-muted mb-2">{{ service.short_description }}</p>
+                                            <p class="card-text mb-0">
+                                                <strong>
+                                                    <i class="fas fa-tag me-1"></i>Price:
+                                                </strong> 
+                                                <span class="text-primary">${{ service.price }}</span>
+                                            </p>
+                                        </div>
+                                        <a href="{% url 'service_detail' service.id %}" 
+                                           class="btn btn-primary">
+                                            <i class="fas fa-info-circle me-1"></i>View Details
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-exclamation-circle fa-3x text-muted mb-3"></i>
+                                <p class="lead text-muted">No services available at the moment.</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
         </div>
-        {% empty %}
-        <p>No services available at the moment.</p>
-        {% endfor %}
-      </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  </body>
-</html>
+</div>
+{% endblock %}
