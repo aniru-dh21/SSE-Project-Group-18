@@ -12,6 +12,10 @@ urlpatterns = [
     path('recommend/', views.recommend_service, name='recommend_service'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('edit_profile/', views.edit_profile, name='edit_profile'),
+    path('packages/', views.package_list, name='package_list'),
+    path('packages/<int:pk>/', views.package_detail, name='package_detail'),
+    path('packages/<int:pk>/book/', views.book_package, name='book_package'),
+    path('packages/create/', views.create_package, name='create_package'),
     
     path('success/', views.success_view, name='success'),
     path('cancel/', views.cancel_view, name='cancel'),

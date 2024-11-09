@@ -2,11 +2,11 @@ from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404  # Ensure get_object_or_404 is imported
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db import transaction
 
-from .forms import RegistrationForm, LoginForm
-from .models import User, Service, Booking  # Ensure Service and Booking are imported
+from .forms import RegistrationForm, LoginForm, ServicePackageForm, CustomizePackageForm
+from .models import User, Service, Booking, ServicePackage, PackageService  # Ensure Service and Booking are imported
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import stripe # type: ignore
@@ -183,3 +183,97 @@ def success_view(request):
 
 def cancel_view(request):
     return render(request, 'cancel.html')
+
+def package_list(request):
+    packages = ServicePackage.objects.prefetch_related('services').all()
+    return render(request, 'packages/package_list.html', {'packages': packages})
+
+def package_detail(request, pk):
+    package = get_object_or_404(ServicePackage, pk=pk)
+    customize_form = None
+    
+    if package.is_customizable:
+        customize_form = CustomizePackageForm(package)
+    
+    # Calculate the discount amount
+    total_price = package.get_total_price()
+    original_price = package.get_original_price()  
+    discount = original_price - total_price
+    
+    context = {
+        'package': package,
+        'customize_form': customize_form,
+        'discount': discount,
+        'original_price': original_price,
+    }
+    return render(request, 'packages/package_detail.html', context)
+
+@login_required
+def book_package(request, pk):
+    package = get_object_or_404(ServicePackage, pk=pk)
+    selected_services = package.services.all()
+    total_price = package.get_total_price()
+
+    if request.method == 'POST':
+        if package.is_customizable:
+            form = CustomizePackageForm(package, request.POST)
+            if form.is_valid():
+                selected_services = []
+                for package_service in PackageService.objects.filter(package=package):
+                    if not package_service.is_optional or \
+                       form.cleaned_data.get(f'service_{package_service.service.id}', False):
+                        selected_services.append(package_service.service)
+                
+                total_price = sum(service.price for service in selected_services)
+                discount = (total_price * package.discount_percentage) / 100
+                total_price -= discount
+
+        # Create Stripe session for the package
+        session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+                'price_data': {
+                    'currency': 'usd',
+                    'product_data': {
+                        'name': f"Package: {package.name}",
+                    },
+                    'unit_amount': int(total_price * 100),
+                },
+                'quantity': 1,
+            }],
+            mode='payment',
+            success_url=request.build_absolute_uri('/success/'),
+            cancel_url=request.build_absolute_uri('/cancel/'),
+        )
+
+        # Create bookings for all selected services
+        with transaction.atomic():
+            for service in selected_services:
+                Booking.objects.create(
+                    user=request.user,
+                    service=service,
+                    amount_paid=service.price * (1 - package.discount_percentage/100),
+                    stripe_session_id=session.id,
+                )
+
+        return redirect(session.url)
+
+    return render(request, 'packages/book_package.html', {
+        'package': package,
+        'selected_services': selected_services,
+        'total_price': total_price,
+    })
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def create_package(request):
+    if request.method == 'POST':
+        form = ServicePackageForm(request.POST)
+        if form.is_valid():
+            package = form.save()
+            messages.success(request, 'Service package created successfully!')
+            return redirect('package_list')
+    else:
+        form = ServicePackageForm()
+    
+    return render(request, 'packages/create_package.html', {'form': form})

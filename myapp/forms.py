@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import User
+from .models import User, ServicePackage, PackageService, Service
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 
@@ -59,3 +59,24 @@ class RegistrationForm(UserCreationForm):
 class LoginForm(forms.Form):
     username = forms.CharField(max_length=100)
     password = forms.CharField(widget=forms.PasswordInput)
+
+class ServicePackageForm(forms.ModelForm):
+    services = forms.ModelMultipleChoiceField(
+        queryset=Service.objects.all(),
+        widget=forms.CheckboxSelectMultiple
+    )
+
+    class Meta:
+        model = ServicePackage
+        fields = ['name', 'description', 'services', 'base_price', 'discount_percentage', 'is_customizable']
+
+class CustomizePackageForm(forms.Form):
+    def __init__(self, package, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for package_service in PackageService.objects.filter(package=package):
+            if package_service.is_optional:
+                self.fields[f'service_{package_service.service.id}'] = forms.BooleanField(
+                    label=f"{package_service.service.name} (${package_service.service.price})",
+                    required=False,
+                    initial=True
+                )

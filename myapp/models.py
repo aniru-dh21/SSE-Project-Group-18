@@ -28,8 +28,6 @@ class User(AbstractUser):
         verbose_name='user permissions'
     )
 
-# models.py
-from django.db import models
 
 class Service(models.Model):
     name = models.CharField(max_length=100)
@@ -56,3 +54,46 @@ class Booking(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.service.name}"
 
+class ServicePackage(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    services = models.ManyToManyField(Service, through='PackageService', related_name='packages')
+    base_price = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
+    discount_percentage = models.DecimalField(max_digits=5, decimal_places=2)
+    is_customizable = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)  
+    updated_at = models.DateTimeField(auto_now=True, null=True)      
+
+    class Meta:
+        db_table = 'myapp_servicepackage'
+        
+    def get_original_price(self):
+        """Calculate the original price before discount"""
+        services_total = sum(service.price for service in self.services.all())
+        return services_total + self.base_price
+    
+    def get_total_price(self):
+        """Calculate the final price after discount"""
+        original_price = self.get_original_price()
+        discount = (original_price * self.discount_percentage) / 100
+        return original_price - discount
+
+    def __str__(self):
+        return self.name
+
+class PackageService(models.Model):
+    package = models.ForeignKey(ServicePackage, on_delete=models.CASCADE, related_name='package_services')
+    service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name='package_services')
+    is_optional = models.BooleanField(default=False)
+    individual_discount = models.DecimalField(
+        max_digits=5, 
+        decimal_places=2, 
+        default=0.00,
+        help_text="Individual discount percentage for this service within the package"
+    )
+    class Meta:
+        db_table = 'myapp_packageservice'
+        unique_together = ['package', 'service']
+        
+    def __str__(self):
+        return f"{self.package.name} - {self.service.name}"
