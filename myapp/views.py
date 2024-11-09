@@ -1,4 +1,3 @@
-# myapp/views.py
 from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404  # Ensure get_object_or_404 is imported
 from django.contrib import messages
@@ -6,7 +5,6 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 
-  # Correct import for login_required
 from .forms import RegistrationForm, LoginForm
 from .models import User, Service, Booking  # Ensure Service and Booking are imported
 from django.views.decorators.csrf import csrf_exempt
@@ -98,7 +96,7 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     messages.success(request, 'You have been logged out.')
-    return redirect('login')
+    return render(request, 'logout.html')
 
 def service_list(request):
     services = Service.objects.all()
