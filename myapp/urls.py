@@ -19,6 +19,7 @@ urlpatterns = [
     path('inspection/book/', views.book_inspection, name='book_inspection'),
     path('inspection/<int:inspection_id>/results/', views.view_inspection_results, name='inspection_results'),
     path('inspection/success/', views.inspection_success, name='inspection_success'),
+    path('manage-services/', views.manage_services, name='manage_services'),
     path('success/', views.success_view, name='success'),
     path('cancel/', views.cancel_view, name='cancel'),
     path('stripe_webhook/', views.stripe_webhook, name='stripe_webhook'),

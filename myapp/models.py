@@ -38,6 +38,9 @@ class Service(models.Model):
     experiences = models.TextField(blank=True)
     feedback = models.JSONField(default=list, blank=True)
     renovation_plans = models.TextField(blank=True)
+    provider = models.ForeignKey(User, on_delete=models.CASCADE, related_name='provided_services', null=True)
+    is_available = models.BooleanField(default=True)
+    service_area = models.CharField(max_length=200, blank=True)
 
     def __str__(self):
         return self.name

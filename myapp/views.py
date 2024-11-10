@@ -112,12 +112,29 @@ def recommend_service(request):
 
 @login_required
 def dashboard(request):
-    user_bookings = Booking.objects.filter(user=request.user).select_related('service')
     context = {
         'user': request.user,
-        'bookings': user_bookings
     }
-    return render(request, 'dashboard.html', context)
+    
+    if request.user.is_service_provider:
+        # Service provider dashboard
+        provided_services = Service.objects.filter(provider=request.user)
+        service_bookings = Booking.objects.filter(
+            service__in=provided_services
+        ).select_related('user', 'service').order_by('-booking_date')
+        
+        context.update({
+            'provided_services': provided_services,
+            'service_bookings': service_bookings,
+        })
+        return render(request, 'dashboard_provider.html', context)
+    else:
+        # Regular user dashboard
+        user_bookings = Booking.objects.filter(user=request.user).select_related('service')
+        context.update({
+            'bookings': user_bookings,
+        })
+        return render(request, 'dashboard.html', context)
 
 @login_required
 def edit_profile(request):
@@ -327,3 +344,33 @@ def view_inspection_results(request, inspection_id):
 
 def inspection_success(request):
     return render(request, 'inspection/inspection_success.html')
+
+@login_required
+@user_passes_test(lambda u: u.is_service_provider)
+def manage_services(request):
+    if request.method == 'POST':
+        # Handle service creation/updating
+        service_id = request.POST.get('service_id')
+        if service_id:
+            service = get_object_or_404(Service, id=service_id, provider=request.user)
+            # Update existing service
+            service.name = request.POST.get('name')
+            service.description = request.POST.get('description')
+            service.price = request.POST.get('price')
+            service.is_available = request.POST.get('is_available', False) == 'on'
+            service.service_area = request.POST.get('service_area')
+            service.save()
+        else:
+            # Create new service
+            Service.objects.create(
+                provider=request.user,
+                name=request.POST.get('name'),
+                description=request.POST.get('description'),
+                price=request.POST.get('price'),
+                is_available=request.POST.get('is_available', False) == 'on',
+                service_area=request.POST.get('service_area')
+            )
+        return redirect('dashboard')
+    
+    services = Service.objects.filter(provider=request.user)
+    return render(request, 'manage_services.html', {'services': services})

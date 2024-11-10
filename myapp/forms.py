@@ -18,6 +18,9 @@ class RegistrationForm(UserCreationForm):
         ]
     )
 
+    trade = forms.CharField(max_length=50, required=False)
+    profession = forms.CharField(max_length=50, required=False)
+
     # Password validation
     def clean_password1(self):
         password = self.cleaned_data.get('password1')
@@ -33,7 +36,6 @@ class RegistrationForm(UserCreationForm):
             raise ValidationError('Password must contain at least one special character')
         return password
     
-    # Clean and sanitize other fields
     def clean_mobile(self):
         mobile = self.cleaned_data.get('mobile')
         return forms.CharField(validators=[
@@ -48,6 +50,20 @@ class RegistrationForm(UserCreationForm):
         if not cleaned_cc.isdigit() or len(cleaned_cc) not in [15, 16]:
             raise ValidationError('Invalid credit card number')
         return cleaned_cc
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        is_service_provider = cleaned_data.get('is_service_provider')
+        trade = cleaned_data.get('trade')
+        profession = cleaned_data.get('profession')
+
+        if is_service_provider:
+            if not trade:
+                self.add_error('trade', 'Trade is required for service providers')
+            if not profession:
+                self.add_error('profession', 'Profession is required for service providers')
+
+        return cleaned_data
     
     class Meta:
         model = User

@@ -174,47 +174,45 @@
                             {% endif %}
                         </div>
 
-                        <!-- Trade -->
-                        <div class="mb-3">
-                            <label for="trade" class="form-label">Trade*</label>
+                        <!-- Service Provider -->
+                         <div class="mb-3">
+                            <div class = "form-check">
+                                <input type="checkbox" 
+                                        class="form-check-input {% if form.is_service_provider.errors %}is-invalid{% endif %}" 
+                                        id="is_service_provider" 
+                                        name="is_service_provider" 
+                                        {% if form.is_service_provider.value %}checked{% endif %}>
+                                <label class="form-check-label" for="is_service_provider">Register as Service Provider</label>
+                                {% if form.is_service_provider.errors %}
+                                    <div class="invalid-feedback">{{ form.is_service_provider.errors|join:", " }}</div>
+                                {% endif %}
+                            </div>
+                         </div>
+
+                         <!-- Trade -->
+                        <div class="mb-3 service-provider-field" style="display: none;">
+                            <label for="trade" class="form-label">Trade</label>
                             <input type="text" 
-                                   class="form-control {% if form.trade.errors %}is-invalid{% endif %}" 
-                                   id="trade" 
-                                   name="trade" 
-                                   value="{{ form.trade.value|default:'' }}"
-                                   required>
+                                    class="form-control {% if form.trade.errors %}is-invalid{% endif %}" 
+                                    id="trade" 
+                                    name="trade" 
+                                    value="{{ form.trade.value|default:'' }}">
                             {% if form.trade.errors %}
                                 <div class="invalid-feedback">{{ form.trade.errors|join:", " }}</div>
                             {% endif %}
                         </div>
 
                         <!-- Profession -->
-                        <div class="mb-3">
-                            <label for="profession" class="form-label">Profession*</label>
+                        <div class="mb-3 service-provider-field" style="display: none;">
+                            <label for="profession" class="form-label">Profession</label>
                             <input type="text" 
-                                   class="form-control {% if form.profession.errors %}is-invalid{% endif %}" 
-                                   id="profession" 
-                                   name="profession" 
-                                   value="{{ form.profession.value|default:'' }}"
-                                   required>
+                                    class="form-control {% if form.profession.errors %}is-invalid{% endif %}" 
+                                    id="profession" 
+                                    name="profession" 
+                                    value="{{ form.profession.value|default:'' }}">
                             {% if form.profession.errors %}
                                 <div class="invalid-feedback">{{ form.profession.errors|join:", " }}</div>
                             {% endif %}
-                        </div>
-
-                        <!-- Service Provider -->
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input type="checkbox" 
-                                       class="form-check-input {% if form.is_service_provider.errors %}is-invalid{% endif %}" 
-                                       id="is_service_provider" 
-                                       name="is_service_provider" 
-                                       {% if form.is_service_provider.value %}checked{% endif %}>
-                                <label class="form-check-label" for="is_service_provider">Register as Service Provider</label>
-                                {% if form.is_service_provider.errors %}
-                                    <div class="invalid-feedback">{{ form.is_service_provider.errors|join:", " }}</div>
-                                {% endif %}
-                            </div>
                         </div>
 
                         <div class="d-grid gap-2">
@@ -255,6 +253,25 @@ document.getElementById('credit_card').addEventListener('input', function(e) {
         value = value.match(new RegExp('.{1,4}', 'g')).join('-');
     }
     e.target.value = value;
+});
+
+// Handle service provider fields visibility
+document.getElementById('is_service_provider').addEventListener('change', function(e) {
+    const serviceProviderFields = document.querySelectorAll('.service-provider-field');
+    serviceProviderFields.forEach(field => {
+        field.style.display = e.target.checked ? 'block' : 'none';
+        const input = field.querySelector('input');
+        if (input) {
+            input.required = e.target.checked;
+        }
+    });
+});
+
+// Initialize fields visibility on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const checkbox = document.getElementById('is_service_provider');
+    const event = new Event('change');
+    checkbox.dispatchEvent(event);
 });
 </script>
 {% endblock %}
