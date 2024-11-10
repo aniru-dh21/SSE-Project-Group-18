@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+    <h2>Inspection Results</h2>
+    <div class="inspection-summary">
+        <p>Date: {{ inspection.preferred_date }}</p>
+        <p>Status: {{ inspection.get_status_display }}</p>
+        <p>Total Estimated Cost: ${{ total_estimated_cost }}</p>
+    </div>
+    
+    <div class="findings-list">
+        {% for finding in findings %}
+        <div class="finding-item">
+            <h4>{{ finding.location_in_house }}</h4>
+            <p class="urgency {{ finding.urgency_level }}">{{ finding.get_urgency_level_display }}</p>
+            <p>{{ finding.issue_description }}</p>
+            <p>Estimated Cost: ${{ finding.estimated_cost }}</p>
+            {% if finding.recommended_service %}
+            <p>Recommended Service: {{ finding.recommended_service.name }}</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

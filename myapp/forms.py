@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import User, ServicePackage, PackageService, Service
+from .models import User, ServicePackage, PackageService, Service, InspectionService, InspectionFindings
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 
@@ -80,3 +80,34 @@ class CustomizePackageForm(forms.Form):
                     required=False,
                     initial=True
                 )
+
+class InspectionServiceForm(forms.ModelForm):
+    preferred_date = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date'}),
+        help_text="When would you like the inspection to take place?"
+    )
+    alternative_date = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date'}),
+        required=False,
+        help_text="Optional alternative date if preferred date is unavailable"
+    )
+    preferred_cost_range = forms.ChoiceField(
+        choices=[
+            ('0-100', '$0-$100'),
+            ('100-300', '$100-$300'),
+            ('300-500', '$300-$500'),
+            ('500+', '$500+')
+        ],
+        help_text="What is your budget range for the inspection?"
+    )
+    special_requirements = forms.CharField(
+        widget=forms.Textarea,
+        required=False,
+        help_text="Any special requirements or areas of particular concern?"
+    )
+
+    class Meta:
+        model = InspectionService
+        fields = ['preferred_date', 'alternative_date', 'duration',
+                  'preferred_cost_range', 'special_requirements']
+        

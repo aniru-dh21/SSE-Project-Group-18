@@ -16,7 +16,9 @@ urlpatterns = [
     path('packages/<int:pk>/', views.package_detail, name='package_detail'),
     path('packages/<int:pk>/book/', views.book_package, name='book_package'),
     path('packages/create/', views.create_package, name='create_package'),
-    
+    path('inspection/book/', views.book_inspection, name='book_inspection'),
+    path('inspection/<int:inspection_id>/results/', views.view_inspection_results, name='inspection_results'),
+    path('inspection/success/', views.inspection_success, name='inspection_success'),
     path('success/', views.success_view, name='success'),
     path('cancel/', views.cancel_view, name='cancel'),
     path('stripe_webhook/', views.stripe_webhook, name='stripe_webhook'),

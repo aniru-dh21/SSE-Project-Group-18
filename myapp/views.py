@@ -5,8 +5,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db import transaction
 
-from .forms import RegistrationForm, LoginForm, ServicePackageForm, CustomizePackageForm
-from .models import User, Service, Booking, ServicePackage, PackageService  # Ensure Service and Booking are imported
+from .forms import RegistrationForm, LoginForm, ServicePackageForm, CustomizePackageForm, InspectionServiceForm
+from .models import User, Service, Booking, ServicePackage, PackageService, InspectionService, InspectionFindings  # Ensure Service and Booking are imported
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import stripe # type: ignore
@@ -277,3 +277,53 @@ def create_package(request):
         form = ServicePackageForm()
     
     return render(request, 'packages/create_package.html', {'form': form})
+
+@login_required
+def book_inspection(request):
+    if request.method == 'POST':
+        form = InspectionServiceForm(request.POST)
+        if form.is_valid():
+            inspection = form.save(commit=False)
+            inspection.user = request.user
+            inspection.save()
+            
+            # Create Stripe session for inspection payment
+            session = stripe.checkout.Session.create(
+                payment_method_types=['card'],
+                line_items=[{
+                    'price_data': {
+                        'currency': 'usd',
+                        'product_data': {
+                            'name': 'General House Inspection Service',
+                        },
+                        'unit_amount': 10000,  # $100.00
+                    },
+                    'quantity': 1,
+                }],
+                mode='payment',
+                success_url=request.build_absolute_uri('/inspection/success/'),
+                cancel_url=request.build_absolute_uri('/inspection/cancel/'),
+            )
+            
+            return redirect(session.url)
+    else:
+        form = InspectionServiceForm()
+    
+    return render(request, 'inspection/book_inspection.html', {'form': form})
+
+@login_required
+def view_inspection_results(request, inspection_id):
+    inspection = get_object_or_404(InspectionService, id=inspection_id, user=request.user)
+    findings = inspection.findings.all().order_by('-urgency_level')
+    
+    total_estimated_cost = sum(finding.estimated_cost for finding in findings)
+    
+    context = {
+        'inspection': inspection,
+        'findings': findings,
+        'total_estimated_cost': total_estimated_cost,
+    }
+    return render(request, 'inspection/inspection_results.html', context)
+
+def inspection_success(request):
+    return render(request, 'inspection/inspection_success.html')

@@ -97,3 +97,47 @@ class PackageService(models.Model):
         
     def __str__(self):
         return f"{self.package.name} - {self.service.name}"
+    
+class InspectionService(models.Model):
+    DURATION_CHOICES = [
+        ('few_hours', 'Few Hours'),
+        ('one_day', 'One Day'),
+        ('several_days', 'Several Days'),
+    ]
+
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('in_progress', 'In Progress'),
+        ('completed', 'Completed'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    preferred_date = models.DateField()
+    alternative_date = models.DateField(null=True, blank=True)
+    duration = models.CharField(max_length=20, choices=DURATION_CHOICES)
+    preferred_cost_range = models.CharField(max_length=50)
+    special_requirements = models.TextField(blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Inspection for {self.user.username} on (self.preferred_data)"
+
+class InspectionFindings(models.Model):
+    URGENCY_CHOICES = [
+        ('critical', 'Critical - Immediate Action Required'),
+        ('high', 'High Priority'),
+        ('medium', 'Medium Priority'),
+        ('low', 'Low Priority'),
+    ]
+
+    inspection = models.ForeignKey(InspectionService, on_delete=models.CASCADE, related_name='findings')
+    issue_description = models.TextField()
+    location_in_house = models.CharField(max_length=100)
+    urgency_level = models.CharField(max_length=20, choices=URGENCY_CHOICES)
+    estimated_cost = models.DecimalField(max_digits=10, decimal_places=2)
+    recommended_cost = models.ForeignKey(Service, on_delete=models.SET_NULL, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.get_urgency_level_display()} issue at {self.location_in_house}"
+    
