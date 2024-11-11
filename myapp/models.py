@@ -28,7 +28,6 @@ class User(AbstractUser):
         verbose_name='user permissions'
     )
 
-
 class Service(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
@@ -45,17 +44,25 @@ class Service(models.Model):
     def __str__(self):
         return self.name
 
-
 class Booking(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('accepted', 'Accepted'),
+        ('rejected', 'Rejected'),
+        ('completed', 'Completed')
+    ]
+    
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
     booking_date = models.DateTimeField(auto_now_add=True)
     payment_status = models.CharField(max_length=20, choices=[('Pending', 'Pending'), ('Completed', 'Completed')], default='Pending')
     amount_paid = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     stripe_session_id = models.CharField(max_length=255, blank=True, null=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    notes = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return f"{self.user.username} - {self.service.name}"
+        return f"{self.user.username} - {self.service.name} ({self.get_status_display()})"
 
 class ServicePackage(models.Model):
     name = models.CharField(max_length=100)

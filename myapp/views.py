@@ -12,6 +12,7 @@ from django.http import JsonResponse
 import stripe # type: ignore
 import bleach
 from django.utils.html import escape
+from django.http import HttpResponseForbidden
 
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -386,3 +387,49 @@ def manage_services(request):
     
     services = Service.objects.filter(provider=request.user)
     return render(request, 'manage_services.html', {'services': services})
+
+@login_required
+@user_passes_test(lambda u: u.is_service_provider)
+def update_booking_status(request, booking_id):
+    if request.method == 'POST':
+        booking = get_object_or_404(Booking, id=booking_id)
+        
+        # Verify that the service provider owns this booking's service
+        if booking.service.provider != request.user:
+            return HttpResponseForbidden("You don't have permission to modify this booking.")
+        
+        new_status = request.POST.get('status')
+        if new_status in dict(Booking.STATUS_CHOICES):
+            # Don't allow changing status if it's already completed or rejected
+            if booking.status not in ['completed', 'rejected']:
+                booking.status = new_status
+                booking.save()
+                
+                # Send notification to the client (you can implement this)
+                # notify_client_of_status_change(booking)
+                
+                messages.success(request, f'Booking status updated to {booking.get_status_display()}')
+            else:
+                messages.error(request, 'Cannot modify a completed or rejected booking')
+        else:
+            messages.error(request, 'Invalid status')
+            
+    return redirect('dashboard')
+
+@login_required
+@user_passes_test(lambda u: u.is_service_provider)
+def add_booking_note(request, booking_id):
+    if request.method == 'POST':
+        booking = get_object_or_404(Booking, id=booking_id)
+        
+        # Verify that the service provider owns this booking's service
+        if booking.service.provider != request.user:
+            return HttpResponseForbidden("You don't have permission to modify this booking.")
+        
+        note = request.POST.get('note')
+        if note:
+            booking.notes = note
+            booking.save()
+            messages.success(request, 'Note added to booking successfully')
+        
+    return redirect('dashboard')
