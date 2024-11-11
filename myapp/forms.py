@@ -136,3 +136,23 @@ class InspectionResultForm(forms.ModelForm):
             'issue_description': forms.Textarea(attrs={'rows': 4}),
             'estimated_cost': forms.NumberInput(attrs={'step': '0.01'}),
         }
+
+class InspectionRecommendationForm(forms.ModelForm):
+    class Meta:
+        model = InspectionFindings
+        fields = [
+            'issue_description', 
+            'location_in_house', 
+            'urgency_level',
+            'estimated_cost',
+            'recommended_services',
+            'provider_feedback',
+            'recommendation_priority',
+            'estimated_timeline'
+        ]
+        widgets = {
+            'issue_description': forms.Textarea(attrs={'rows': 4}),
+            'provider_feedback': forms.Textarea(attrs={'rows': 4}),
+            'recommended_services': forms.CheckboxSelectMultiple(),
+            'estimated_cost': forms.NumberInput(attrs={'step': '0.01'})
+        }

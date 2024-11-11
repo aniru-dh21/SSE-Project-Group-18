@@ -154,6 +154,30 @@ class InspectionFindings(models.Model):
     urgency_level = models.CharField(max_length=20, choices=URGENCY_CHOICES)
     estimated_cost = models.DecimalField(max_digits=10, decimal_places=2)
     recommended_cost = models.ForeignKey(Service, on_delete=models.SET_NULL, null=True, blank=True)
+    recommended_services = models.ManyToManyField(
+        Service, 
+        related_name='recommended_in_findings',
+        blank=True
+    )
+    provider_feedback = models.TextField(
+        blank=True,
+        help_text="Service provider's feedback and recommendations"
+    )
+    recommendation_priority = models.CharField(
+        max_length=20,
+        choices=[
+            ('immediate', 'Immediate Action Recommended'),
+            ('soon', 'Address Within 3-6 Months'),
+            ('future', 'Future Consideration'),
+            ('optional', 'Optional Improvement')
+        ],
+        default='soon'
+    )
+    estimated_timeline = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text="Estimated timeline for recommended services"
+    )
 
     def __str__(self):
         return f"{self.get_urgency_level_display()} issue at {self.location_in_house}"

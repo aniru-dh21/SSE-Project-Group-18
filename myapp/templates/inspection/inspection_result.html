@@ -1,25 +1,119 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container">
-    <h2>Inspection Results</h2>
-    <div class="inspection-summary">
-        <p>Date: {{ inspection.preferred_date }}</p>
-        <p>Status: {{ inspection.get_status_display }}</p>
-        <p>Total Estimated Cost: ${{ total_estimated_cost }}</p>
-    </div>
-    
-    <div class="findings-list">
-        {% for finding in findings %}
-        <div class="finding-item">
-            <h4>{{ finding.location_in_house }}</h4>
-            <p class="urgency {{ finding.urgency_level }}">{{ finding.get_urgency_level_display }}</p>
-            <p>{{ finding.issue_description }}</p>
-            <p>Estimated Cost: ${{ finding.estimated_cost }}</p>
-            {% if finding.recommended_service %}
-            <p>Recommended Service: {{ finding.recommended_service.name }}</p>
-            {% endif %}
+<div class="container mx-auto px-4 py-8">
+    <h2 class="text-2xl font-bold mb-6">Submit Inspection Results</h2>
+
+    {% if findings %}
+    <div class="mb-8">
+        <h3 class="text-xl font-semibold mb-4">Current Findings</h3>
+        <div class="grid gap-4">
+            {% for finding in findings %}
+            <div class="border rounded-lg p-4 bg-white">
+                <p><strong>Location:</strong> {{ finding.location_in_house }}</p>
+                <p><strong>Urgency:</strong> {{ finding.get_urgency_level_display }}</p>
+                <p>{{ finding.issue_description }}</p>
+                <p><strong>Estimated Cost:</strong> ${{ finding.estimated_cost }}</p>
+                
+                {% if finding.recommended_services.exists %}
+                <div class="mt-2">
+                    <p><strong>Recommended Services:</strong></p>
+                    <ul class="list-disc pl-5">
+                        {% for service in finding.recommended_services.all %}
+                        <li>{{ service.name }} - ${{ service.price }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+                
+                {% if finding.provider_feedback %}
+                <div class="mt-2">
+                    <p><strong>Additional Feedback:</strong></p>
+                    <p>{{ finding.provider_feedback }}</p>
+                </div>
+                {% endif %}
+                
+                <p><strong>Priority:</strong> {{ finding.get_recommendation_priority_display }}</p>
+                {% if finding.estimated_timeline %}
+                <p><strong>Timeline:</strong> {{ finding.estimated_timeline }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
     </div>
+    {% endif %}
+
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="mt-6 flex gap-4">
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Add Finding</button>
+            <button type="submit" name="complete_inspection" class="bg-green-500 text-white px-4 py-2 rounded">
+                Complete Inspection
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{# inspection/view_recommendations.html #}
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h2 class="text-2xl font-bold mb-6">Inspection Recommendations</h2>
+    
+    <div class="mb-4">
+        <p><strong>Total Findings:</strong> {{ total_findings }}</p>
+        <p><strong>Inspection Date:</strong> {{ inspection.created_at|date:"F j, Y" }}</p>
+    </div>
+
+    {% for priority, findings in recommendations.items %}
+        {% if findings %}
+        <div class="mb-8">
+            <h3 class="text-xl font-semibold mb-4">
+                {{ priority|title }} Priority Items
+            </h3>
+            
+            <div class="grid gap-4">
+                {% for finding in findings %}
+                <div class="border rounded-lg p-4 bg-white">
+                    <h4 class="font-semibold mb-2">{{ finding.location_in_house }}</h4>
+                    <p class="mb-2">{{ finding.issue_description }}</p>
+                    
+                    <div class="mb-2">
+                        <p><strong>Estimated Cost:</strong> ${{ finding.estimated_cost }}</p>
+                        {% if finding.estimated_timeline %}
+                        <p><strong>Timeline:</strong> {{ finding.estimated_timeline }}</p>
+                        {% endif %}
+                    </div>
+
+                    {% if finding.recommended_services.exists %}
+                    <div class="mb-2">
+                        <p class="font-semibold">Recommended Services:</p>
+                        <ul class="list-disc pl-5">
+                            {% for service in finding.recommended_services.all %}
+                            <li>
+                                {{ service.name }} - ${{ service.price }}
+                                <a href="{% url 'book_service' service.id %}" 
+                                   class="text-blue-500 hover:underline ml-2">
+                                    Book Now
+                                </a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    {% if finding.provider_feedback %}
+                    <div class="mt-2 bg-gray-50 p-3 rounded">
+                        <p class="font-semibold">Provider Feedback:</p>
+                        <p>{{ finding.provider_feedback }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    {% endfor %}
 </div>
 {% endblock %}

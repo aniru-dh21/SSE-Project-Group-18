@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db import transaction
 
-from .forms import RegistrationForm, LoginForm, ServicePackageForm, CustomizePackageForm, InspectionServiceForm, InspectionResultForm
+from .forms import RegistrationForm, LoginForm, ServicePackageForm, CustomizePackageForm, InspectionServiceForm, InspectionResultForm, InspectionRecommendationForm
 from .models import User, Service, Booking, ServicePackage, PackageService, InspectionService, InspectionFindings  # Ensure Service and Booking are imported
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
@@ -13,7 +13,6 @@ import stripe # type: ignore
 import bleach
 from django.utils.html import escape
 from django.http import HttpResponseForbidden
-
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -496,4 +495,74 @@ def submit_inspection_results(request, inspection_id):
         'inspection': inspection,
         'findings': findings,
         'available_services': available_services
+    })
+
+@login_required
+@user_passes_test(lambda u: u.is_service_provider)
+def submit_inspection_results(request, inspection_id):
+    inspection = get_object_or_404(
+        InspectionService, 
+        id=inspection_id,
+        inspector=request.user, 
+        status='in_progress'
+    )
+    
+    if request.method == 'POST':
+        if 'complete_inspection' in request.POST:
+            # Handle inspection completion
+            inspection.status = 'completed'
+            inspection.save()
+            messages.success(request, 'Inspection completed successfully!')
+            return redirect('dashboard')
+            
+        form = InspectionRecommendationForm(request.POST)
+        if form.is_valid():
+            finding = form.save(commit=False)
+            finding.inspection = inspection
+            finding.save()
+            # Save many-to-many relationships
+            form.save_m2m()
+            messages.success(request, 'Finding and recommendations added successfully!')
+            return redirect('submit_inspection_results', inspection_id=inspection.id)
+    else:
+        form = InspectionRecommendationForm()
+    
+    # Get existing findings and available services
+    findings = inspection.findings.all().prefetch_related('recommended_services')
+    available_services = Service.objects.filter(is_available=True)
+    
+    return render(request, 'inspection/submit_results.html', {
+        'form': form,
+        'inspection': inspection,
+        'findings': findings,
+        'available_services': available_services
+    })
+
+# Add new view for clients to view recommendations
+@login_required
+def view_inspection_recommendations(request, inspection_id):
+    inspection = get_object_or_404(
+        InspectionService, 
+        id=inspection_id,
+        user=request.user,
+        status='completed'
+    )
+    
+    findings = inspection.findings.all().prefetch_related('recommended_services')
+    
+    # Group recommendations by priority
+    recommendations = {
+        'immediate': [],
+        'soon': [],
+        'future': [],
+        'optional': []
+    }
+    
+    for finding in findings:
+        recommendations[finding.recommendation_priority].append(finding)
+    
+    return render(request, 'inspection/view_recommendations.html', {
+        'inspection': inspection,
+        'recommendations': recommendations,
+        'total_findings': findings.count()
     })
