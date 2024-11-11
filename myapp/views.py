@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db import transaction
 
-from .forms import RegistrationForm, LoginForm, ServicePackageForm, CustomizePackageForm, InspectionServiceForm
+from .forms import RegistrationForm, LoginForm, ServicePackageForm, CustomizePackageForm, InspectionServiceForm, InspectionResultForm
 from .models import User, Service, Booking, ServicePackage, PackageService, InspectionService, InspectionFindings  # Ensure Service and Booking are imported
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
@@ -433,3 +433,67 @@ def add_booking_note(request, booking_id):
             messages.success(request, 'Note added to booking successfully')
         
     return redirect('dashboard')
+
+@login_required
+@user_passes_test(lambda u: u.is_service_provider)
+def available_inspections(request):
+    # Show only pending inspections
+    inspections = InspectionService.objects.filter(status='pending')
+    return render(request, 'inspection/available_inspections.html', {
+        'inspections': inspections
+    })
+
+@login_required
+@user_passes_test(lambda u: u.is_service_provider)
+def accept_inspection(request, inspection_id):
+    inspection = get_object_or_404(InspectionService, id=inspection_id, status='pending')
+    
+    if request.method == 'POST':
+        inspection.inspector = request.user
+        inspection.status = 'in_progress'
+        inspection.save()
+        
+        messages.success(request, 'Inspection assignment accepted successfully!')
+        return redirect('submit_inspection_results', inspection_id=inspection.id)
+    
+    return render(request, 'inspection/accept_inspection.html', {
+        'inspection': inspection
+    })
+
+@login_required
+@user_passes_test(lambda u: u.is_service_provider)
+def submit_inspection_results(request, inspection_id):
+    inspection = get_object_or_404(InspectionService, id=inspection_id, 
+                                 inspector=request.user, status='in_progress')
+    
+    if request.method == 'POST':
+        form = InspectionResultForm(request.POST)
+        if form.is_valid():
+            finding = form.save(commit=False)
+            finding.inspection = inspection
+            finding.save()
+            
+            # Check if this is the final submission
+            if request.POST.get('complete_inspection'):
+                inspection.status = 'completed'
+                inspection.save()
+                messages.success(request, 'Inspection completed successfully!')
+                return redirect('dashboard')
+            
+            messages.success(request, 'Finding added successfully!')
+            return redirect('submit_inspection_results', inspection_id=inspection.id)
+    else:
+        form = InspectionResultForm()
+    
+    # Get existing findings for this inspection
+    findings = inspection.findings.all()
+    
+    # Get available services for recommendations
+    available_services = Service.objects.filter(is_available=True)
+    
+    return render(request, 'inspection/submit_results.html', {
+        'form': form,
+        'inspection': inspection,
+        'findings': findings,
+        'available_services': available_services
+    })

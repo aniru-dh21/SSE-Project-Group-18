@@ -127,3 +127,12 @@ class InspectionServiceForm(forms.ModelForm):
         fields = ['preferred_date', 'alternative_date', 'duration',
                   'preferred_cost_range', 'special_requirements']
         
+class InspectionResultForm(forms.ModelForm):
+    class Meta:
+        model = InspectionFindings
+        fields = ['issue_description', 'location_in_house', 'urgency_level', 
+                 'estimated_cost', 'recommended_cost']
+        widgets = {
+            'issue_description': forms.Textarea(attrs={'rows': 4}),
+            'estimated_cost': forms.NumberInput(attrs={'step': '0.01'}),
+        }

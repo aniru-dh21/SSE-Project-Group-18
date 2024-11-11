@@ -130,6 +130,13 @@ class InspectionService(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
 
+    inspector = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='assigned_inspections'
+    )
+
     def __str__(self):
         return f"Inspection for {self.user.username} on (self.preferred_data)"
 

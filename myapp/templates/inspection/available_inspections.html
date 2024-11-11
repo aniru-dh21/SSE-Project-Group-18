@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h2 class="text-2xl font-bold mb-6">Available Inspections</h2>
+    
+    {% if inspections %}
+        <div class="grid gap-6">
+            {% for inspection in inspections %}
+                <div class="border rounded-lg p-6 bg-white shadow-sm">
+                    <h3 class="text-xl font-semibold mb-2">Inspection Request</h3>
+                    <p class="mb-2">Preferred Date: {{ inspection.preferred_date }}</p>
+                    <p class="mb-2">Duration: {{ inspection.get_duration_display }}</p>
+                    <p class="mb-2">Cost Range: {{ inspection.preferred_cost_range }}</p>
+                    {% if inspection.special_requirements %}
+                        <p class="mb-4">Special Requirements: {{ inspection.special_requirements }}</p>
+                    {% endif %}
+                    <form method="POST" action="{% url 'accept_inspection' inspection.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                            Accept Inspection
+                        </button>
+                    </form>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-gray-600">No pending inspections available at the moment.</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h2 class="text-2xl font-bold mb-6">Submit Inspection Results</h2>
+    
+    <!-- Existing Findings -->
+    {% if findings %}
+        <div class="mb-8">
+            <h3 class="text-xl font-semibold mb-4">Current Findings</h3>
+            <div class="grid gap-4">
+                {% for finding in findings %}
+                    <div class="border rounded-lg p-4 bg-white">
+                        <p class="font-medium">Location: {{ finding.location_in_house }}</p>
+                        <p class="text-red-600">Urgency: {{ finding.get_urgency_level_display }}</p>
+                        <p>{{ finding.issue_description }}</p>
+                        <p class="font-medium">Estimated Cost: ${{ finding.estimated_cost }}</p>
+                        {% if finding.recommended_service %}
+                            <p>Recommended Service: {{ finding.recommended_service.name }}</p>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+    
+    <!-- Add New Finding Form -->
+    <form method="POST" class="bg-white rounded-lg p-6 shadow-sm">
+        {% csrf_token %}
+        {{ form.as_p }}
+        
+        <div class="mt-6 flex gap-4">
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                Add Finding
+            </button>
+            
+            <button type="submit" name="complete_inspection" value="true" 
+                    class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                Complete Inspection
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
