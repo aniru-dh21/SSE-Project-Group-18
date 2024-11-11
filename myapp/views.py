@@ -349,19 +349,29 @@ def inspection_success(request):
 @user_passes_test(lambda u: u.is_service_provider)
 def manage_services(request):
     if request.method == 'POST':
-        # Handle service creation/updating
+        action = request.POST.get('action')
         service_id = request.POST.get('service_id')
-        if service_id:
+        
+        if action == 'toggle_status':
+            # Handle status toggle
             service = get_object_or_404(Service, id=service_id, provider=request.user)
-            # Update existing service
+            service.is_available = not service.is_available
+            service.save()
+            messages.success(request, f'Service status updated successfully!')
+            
+        elif action == 'update':
+            # Handle service update
+            service = get_object_or_404(Service, id=service_id, provider=request.user)
             service.name = request.POST.get('name')
             service.description = request.POST.get('description')
             service.price = request.POST.get('price')
-            service.is_available = request.POST.get('is_available', False) == 'on'
+            service.is_available = request.POST.get('is_available') == 'on'
             service.service_area = request.POST.get('service_area')
             service.save()
+            messages.success(request, f'Service updated successfully!')
+            
         else:
-            # Create new service
+            # Handle new service creation
             Service.objects.create(
                 provider=request.user,
                 name=request.POST.get('name'),
@@ -370,7 +380,9 @@ def manage_services(request):
                 is_available=request.POST.get('is_available', False) == 'on',
                 service_area=request.POST.get('service_area')
             )
-        return redirect('dashboard')
+            messages.success(request, 'New service added successfully!')
+            
+        return redirect('manage_services')
     
     services = Service.objects.filter(provider=request.user)
     return render(request, 'manage_services.html', {'services': services})

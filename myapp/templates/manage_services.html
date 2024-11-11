@@ -1,14 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
+
 <div class="container mt-4">
     <h2>Manage Services</h2>
-    
+
+    <!-- Add New Service Form -->
     <div class="card mt-4">
         <div class="card-header">
             <h5 class="mb-0">Add New Service</h5>
         </div>
         <div class="card-body">
-            <form method="POST">
+            <form method="POST" action="{% url 'manage_services' %}">
                 {% csrf_token %}
                 <div class="mb-3">
                     <label for="name" class="form-label">Service Name</label>
@@ -34,13 +36,15 @@
             </form>
         </div>
     </div>
-    
+
+    <!-- Existing Services List -->
     <div class="card mt-4">
         <div class="card-header">
             <h5 class="mb-0">Your Services</h5>
         </div>
         <div class="card-body">
             {% if services %}
+            <div class="table-responsive">
                 <table class="table">
                     <thead>
                         <tr>
@@ -55,18 +59,74 @@
                         <tr>
                             <td>{{ service.name }}</td>
                             <td>${{ service.price }}</td>
-                            <td>{{ service.is_available|yesno:"Available,Not Available" }}</td>
                             <td>
-                                <button class="btn btn-sm btn-primary">Edit</button>
+                                <form method="POST" action="{% url 'manage_services' %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="service_id" value="{{ service.id }}">
+                                    <input type="hidden" name="action" value="toggle_status">
+                                    <button type="submit" class="btn btn-sm {% if service.is_available %}btn-success{% else %}btn-secondary{% endif %}">
+                                        {{ service.is_available|yesno:"Available,Not Available" }}
+                                    </button>
+                                </form>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editModal{{ service.id }}">
+                                    Edit
+                                </button>
                             </td>
                         </tr>
+
+                        <!-- Edit Modal for each service -->
+                        <div class="modal fade" id="editModal{{ service.id }}" tabindex="-1" aria-labelledby="editModalLabel{{ service.id }}" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <form method="POST" action="{% url 'manage_services' %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="service_id" value="{{ service.id }}">
+                                        <input type="hidden" name="action" value="update">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="editModalLabel{{ service.id }}">Edit Service</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="mb-3">
+                                                <label for="edit_name{{ service.id }}" class="form-label">Service Name</label>
+                                                <input type="text" class="form-control" id="edit_name{{ service.id }}" name="name" value="{{ service.name }}" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="edit_description{{ service.id }}" class="form-label">Description</label>
+                                                <textarea class="form-control" id="edit_description{{ service.id }}" name="description" rows="3" required>{{ service.description }}</textarea>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="edit_price{{ service.id }}" class="form-label">Price ($)</label>
+                                                <input type="number" class="form-control" id="edit_price{{ service.id }}" name="price" step="0.01" value="{{ service.price }}" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="edit_service_area{{ service.id }}" class="form-label">Service Area</label>
+                                                <input type="text" class="form-control" id="edit_service_area{{ service.id }}" name="service_area" value="{{ service.service_area }}">
+                                            </div>
+                                            <div class="mb-3 form-check">
+                                                <input type="checkbox" class="form-check-input" id="edit_is_available{{ service.id }}" name="is_available" {% if service.is_available %}checked{% endif %}>
+                                                <label class="form-check-label" for="edit_is_available{{ service.id }}">Available for Booking</label>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            <button type="submit" class="btn btn-primary">Save changes</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
                         {% endfor %}
                     </tbody>
                 </table>
+            </div>
             {% else %}
-                <p>No services added yet.</p>
+            <p>No services added yet.</p>
             {% endif %}
         </div>
     </div>
 </div>
+
 {% endblock %}
