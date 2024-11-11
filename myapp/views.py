@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db import transaction
 
 from .forms import RegistrationForm, LoginForm, ServicePackageForm, CustomizePackageForm, InspectionServiceForm, InspectionResultForm, InspectionRecommendationForm
-from .models import User, Service, Booking, ServicePackage, PackageService, InspectionService, InspectionFindings  # Ensure Service and Booking are imported
+from .models import User, Service, Booking, ServicePackage, PackageService, InspectionService, InspectionFindings 
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import stripe # type: ignore
@@ -164,7 +164,7 @@ def edit_profile(request):
     
     return render(request, 'edit_profile.html', {'user': request.user})
 
-@login_required  # Ensure that the user is logged in before booking
+@login_required  
 def book_service(request, pk):
     service = get_object_or_404(Service, pk=pk)
     if request.method == 'POST':
