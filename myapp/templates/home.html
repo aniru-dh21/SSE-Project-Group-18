@@ -3,111 +3,117 @@
 {% block content %}
 
 <div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8 text-center">
-            <div class="card">
-                <div class="card-body py-5">
-                    <h1 class="display-4 mb-4">Welcome to Service Booking</h1>
-                    <p>Find and book trusted service providers in your area for all your needs.</p>
-
-                    <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
-                        {% if user.is_authenticated %}
-                            <a href="{% url 'dashboard' %}" class="btn btn-primary btn-lg px-4">Dashboard</a>
-                            <a href="{% url 'service_list' %}" class="btn btn-secondary btn-lg px-4">Browse Services</a>
-                        {% else %}
-                            <a href="{% url 'service_list' %}" class="btn btn-primary btn-lg px-4">View Services</a>
-                            <a href="{% url 'register' %}" class="btn btn-secondary btn-lg px-4">Register</a>
-                            <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg px-4">Login</a>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-
-            <!-- New Inspection Service Card -->
-            <div class="card mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8 text-center">
+      <div class="card">
+        <div class="card-body py-5">
+          <h1 class="display-4 mb-4">Welcome to Service Booking</h1>
+          
+          {% if user.is_authenticated %}
+            {% if user.is_service_provider %}
+              <!-- Service Provider View -->
+              <p class="lead mb-4">Manage your services and bookings all in one place.</p>
+              <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+                <a href="{% url 'dashboard' %}" class="btn btn-primary btn-lg px-4">Dashboard</a>
+                <a href="{% url 'manage_services' %}" class="btn btn-secondary btn-lg px-4">Manage Services</a>
+              </div>
+              
+              <div class="card mt-4">
                 <div class="card-body">
-                    <h2 class="h3 mb-3 text-primary">General House Inspection Service</h2>
-                    <p class="mb-4">Get a comprehensive inspection of your house and receive a detailed report of urgent work needed for safety and security.</p>
-                    
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-4">
-                            <div class="d-flex flex-column align-items-center">
-                                <i class="fas fa-clipboard-check fa-2x mb-2 text-primary"></i>
-                                <h5>Thorough Assessment</h5>
-                                <p class="text-center small">Complete house evaluation</p>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="d-flex flex-column align-items-center">
-                                <i class="fas fa-tools fa-2x mb-2 text-primary"></i>
-                                <h5>Priority List</h5>
-                                <p class="text-center small">Detailed work recommendations</p>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="d-flex flex-column align-items-center">
-                                <i class="fas fa-shield-alt fa-2x mb-2 text-primary"></i>
-                                <h5>Safety First</h5>
-                                <p class="text-center small">Focus on security & safety</p>
-                            </div>
-                        </div>
+                  <h2 class="h4 mb-3">Quick Actions</h2>
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <div class="d-grid">
+                        <a href="{% url 'edit_profile' %}" class="btn btn-outline-secondary">Edit Profile</a>
+                      </div>
                     </div>
-
-                    {% if user.is_authenticated %}
-                        <a href="{% url 'book_inspection' %}" class="btn btn-success btn-lg w-100">Book House Inspection</a>
-                    {% else %}
-                        <a href="{% url 'login' %}" class="btn btn-success btn-lg w-100">Login to Book Inspection</a>
-                    {% endif %}
-                </div>
-            </div>
-
-            {% if user.is_authenticated %}
-            <div class="card mt-4">
-                <div class="card-body">
-                    <h2 class="h4 mb-3">Quick Actions</h2>
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <div class="d-grid">
-                                <a href="{% url 'edit_profile' %}" class="btn btn-outline-secondary">Edit Profile</a>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="d-grid">
-                                <a href="{% url 'recommend_service' %}" class="btn btn-outline-secondary">Recommended Services</a>
-                            </div>
-                        </div>
+                    <div class="col-md-6">
+                      <div class="d-grid">
+                        <a href="{% url 'update_booking_status' booking_id=0 %}" class="btn btn-outline-secondary">Update Bookings</a>
+                      </div>
                     </div>
+                  </div>
                 </div>
-            </div>
+              </div>
+              
             {% else %}
-            <div class="card mt-4">
+              <!-- Regular User View -->
+              <p class="lead mb-4">Find and book trusted service providers in your area for all your needs.</p>
+              <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+                <a href="{% url 'dashboard' %}" class="btn btn-primary btn-lg px-4">Dashboard</a>
+                <a href="{% url 'service_list' %}" class="btn btn-secondary btn-lg px-4">Browse Services</a>
+              </div>
+              
+              <div class="card mt-4">
                 <div class="card-body">
-                    <h2 class="h4 mb-3">Why Choose Us?</h2>
-                    <div class="row g-4">
-                        <div class="col-md-4">
-                            <div class="text-center">
-                                <h3 class="h5">Verified Providers</h3>
-                                <p>All our service providers are thoroughly vetted</p>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="text-center">
-                                <h3 class="h5">Quick Booking</h3>
-                                <p>Easy and fast booking process</p>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="text-center">
-                                <h3 class="h5">Secure Payments</h3>
-                                <p>Safe and secure payment processing</p>
-                            </div>
-                        </div>
+                  <h2 class="h3 mb-3 text-primary">General House Inspection Service</h2>
+                  <p>Get a comprehensive inspection of your house and receive a detailed report of urgent work needed for safety and security.</p>
+                  
+                  <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                      <div class="d-flex flex-column align-items-center">
+                        <h5>Thorough Assessment</h5>
+                        <p>Complete house evaluation</p>
+                      </div>
                     </div>
+                    <div class="col-md-4">
+                      <div class="d-flex flex-column align-items-center">
+                        <h5>Priority List</h5>
+                        <p>Detailed work recommendations</p>
+                      </div>
+                    </div>
+                    <div class="col-md-4">
+                      <div class="d-flex flex-column align-items-center">
+                        <h5>Safety First</h5>
+                        <p>Focus on security & safety</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <a href="{% url 'book_inspection' %}" class="btn btn-success btn-lg w-100">Book House Inspection</a>
                 </div>
-            </div>
+              </div>
             {% endif %}
+            
+          {% else %}
+            <!-- Not Logged In View -->
+            <p class="lead mb-4">Find and book trusted service providers in your area for all your needs.</p>
+            <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+              <a href="{% url 'service_list' %}" class="btn btn-primary btn-lg px-4">View Services</a>
+              <a href="{% url 'register' %}" class="btn btn-secondary btn-lg px-4">Register</a>
+              <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg px-4">Login</a>
+            </div>
+            
+            <div class="card mt-4">
+              <div class="card-body">
+                <h2 class="h4 mb-3">Why Choose Us?</h2>
+                <div class="row g-4">
+                  <div class="col-md-4">
+                    <div class="text-center">
+                      <h3 class="h5">Verified Providers</h3>
+                      <p>All our service providers are thoroughly vetted</p>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="text-center">
+                      <h3 class="h5">Quick Booking</h3>
+                      <p>Easy and fast booking process</p>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="text-center">
+                      <h3 class="h5">Secure Payments</h3>
+                      <p>Safe and secure payment processing</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endif %}
         </div>
+      </div>
     </div>
+  </div>
 </div>
 
 {% endblock %}
