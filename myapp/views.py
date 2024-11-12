@@ -402,10 +402,14 @@ def update_booking_status(request, booking_id):
             # Don't allow changing status if it's already completed or rejected
             if booking.status not in ['completed', 'rejected']:
                 booking.status = new_status
-                booking.save()
                 
-                # Send notification to the client (you can implement this)
-                # notify_client_of_status_change(booking)
+                # Update payment status based on booking status
+                if new_status == 'completed':
+                    booking.payment_status = 'Completed'
+                elif new_status == 'rejected':
+                    booking.payment_status = 'Refunded'
+                
+                booking.save()
                 
                 messages.success(request, f'Booking status updated to {booking.get_status_display()}')
             else:

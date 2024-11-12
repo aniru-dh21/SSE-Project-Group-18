@@ -33,49 +33,50 @@
                 </div>
                 <div class="card-body">
                     {% if bookings %}
-                        <div class="table-responsive">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Service</th>
-                                        <th>Date</th>
-                                        <th>Amount</th>
-                                        <th>Payment Status</th>
-                                        <th>Booking Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for booking in bookings %}
-                                        <tr>
-                                            <td>{{ booking.service.name }}</td>
-                                            <td>{{ booking.booking_date|date:"M d, Y" }}</td>
-                                            <td>${{ booking.amount_paid }}</td>
-                                            <td>
-                                                <span class="badge {% if booking.payment_status == 'Completed' %}bg-success{% else %}bg-warning{% endif %}">
-                                                    {{ booking.payment_status }}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <span class="badge 
-                                                    {% if booking.status == 'completed' %}bg-success
-                                                    {% elif booking.status == 'rejected' %}bg-danger
-                                                    {% elif booking.status == 'accepted' %}bg-primary
-                                                    {% else %}bg-warning{% endif %}">
-                                                    {{ booking.get_status_display }}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                        {% if booking.notes %}
-                                            <tr>
-                                                <td colspan="5" class="bg-light">
-                                                    <small><strong>Note:</strong> {{ booking.notes }}</small>
-                                                </td>
-                                            </tr>
-                                        {% endif %}
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Service</th>
+                                    <th>Date</th>
+                                    <th>Amount</th>
+                                    <th>Payment Status</th>
+                                    <th>Booking Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for booking in bookings %}
+                                <tr>
+                                    <td>{{ booking.service.name }}</td>
+                                    <td>{{ booking.booking_date|date:"M d, Y" }}</td>
+                                    <td>${{ booking.amount_paid }}</td>
+                                    <td>
+                                        <span class="badge {% if booking.payment_status == 'Completed' %}bg-success
+                                                         {% elif booking.payment_status == 'Refunded' %}bg-info
+                                                         {% else %}bg-warning{% endif %}">
+                                            {{ booking.payment_status }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge {% if booking.status == 'completed' %}bg-success
+                                                         {% elif booking.status == 'rejected' %}bg-danger
+                                                         {% elif booking.status == 'accepted' %}bg-primary
+                                                         {% else %}bg-warning{% endif %}">
+                                            {{ booking.get_status_display }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% if booking.notes %}
+                                <tr>
+                                    <td colspan="5" class="small text-muted">
+                                        <strong>Note:</strong> {{ booking.notes }}
+                                    </td>
+                                </tr>
+                                {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                     {% else %}
                         <p>You haven't made any bookings yet.</p>
                         <div class="text-center">

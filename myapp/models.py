@@ -52,10 +52,16 @@ class Booking(models.Model):
         ('completed', 'Completed')
     ]
     
+    PAYMENT_STATUS_CHOICES = [
+        ('Pending', 'Pending'),
+        ('Completed', 'Completed'),
+        ('Refunded', 'Refunded')
+    ]
+    
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
     booking_date = models.DateTimeField(auto_now_add=True)
-    payment_status = models.CharField(max_length=20, choices=[('Pending', 'Pending'), ('Completed', 'Completed')], default='Pending')
+    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='Pending')
     amount_paid = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     stripe_session_id = models.CharField(max_length=255, blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
