@@ -1,7 +1,7 @@
-{% extends 'base.html' %}
-{% load static %}
-
+{% extends 'base.html' %} 
+{% load static %} 
 {% block content %}
+
 <div class="container register-container my-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
@@ -9,47 +9,56 @@
                 <div class="card-header">
                     <h2 class="text-center mb-0">Register</h2>
                 </div>
+
                 <div class="card-body">
-                    <form method="POST" class="needs-validation" novalidate>
+                    <form method="post">
                         {% csrf_token %}
-                        
                         {% if form.errors %}
                         <div class="alert alert-danger">
-                            <ul class="mb-0">
-                                {% for field in form %}
-                                    {% for error in field.errors %}
-                                        <li>{{ field.label }}: {{ error }}</li>
-                                    {% endfor %}
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <div>{{ field.label }}: {{ error }}</div>
                                 {% endfor %}
-                            </ul>
+                            {% endfor %}
                         </div>
                         {% endif %}
 
-                        <!-- Username -->
                         <div class="mb-3">
-                            <label for="username" class="form-label">Username*</label>
-                            <input type="text" 
-                                   class="form-control {% if form.username.errors %}is-invalid{% endif %}" 
-                                   id="username" 
-                                   name="username" 
-                                   value="{{ form.username.value|default:'' }}"
-                                   required>
-                            <div class="form-text">Only letters, numbers, and underscores allowed.</div>
-                            {% if form.username.errors %}
-                                <div class="invalid-feedback">{{ form.username.errors|join:", " }}</div>
+                            <label for="first_name" class="form-label">First Name*</label>
+                            <input type="text" class="form-control {% if form.first_name.errors %}is-invalid{% endif %}" id="first_name" name="first_name" required>
+                            {% if form.first_name.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.first_name.errors|join:", " }}
+                            </div>
                             {% endif %}
                         </div>
 
-                        <!-- Password -->
+                        <div class="mb-3">
+                            <label for="last_name" class="form-label">Last Name*</label>
+                            <input type="text" class="form-control {% if form.last_name.errors %}is-invalid{% endif %}" id="last_name" name="last_name" required>
+                            {% if form.last_name.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.last_name.errors|join:", " }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username*</label>
+                            <input type="text" class="form-control {% if form.username.errors %}is-invalid{% endif %}" id="username" name="username" required>
+                            <div class="form-text">Only letters, numbers, and underscores allowed.</div>
+                            {% if form.username.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.username.errors|join:", " }}
+                            </div>
+                            {% endif %}
+                        </div>
+
                         <div class="mb-3">
                             <label for="password1" class="form-label">Password*</label>
-                            <input type="password" 
-                                   class="form-control {% if form.password1.errors %}is-invalid{% endif %}" 
-                                   id="password1" 
-                                   name="password1"
-                                   required>
+                            <input type="password" class="form-control {% if form.password1.errors %}is-invalid{% endif %}" id="password1" name="password1" required>
                             <div class="form-text">
-                                <ul class="small">
+                                <ul class="mb-0">
                                     <li>At least 8 characters long</li>
                                     <li>Must contain at least one number</li>
                                     <li>Must contain at least one uppercase letter</li>
@@ -58,160 +67,106 @@
                                 </ul>
                             </div>
                             {% if form.password1.errors %}
-                                <div class="invalid-feedback">{{ form.password1.errors|join:", " }}</div>
+                            <div class="invalid-feedback">
+                                {{ form.password1.errors|join:", " }}
+                            </div>
                             {% endif %}
                         </div>
 
-                        <!-- Confirm Password -->
                         <div class="mb-3">
                             <label for="password2" class="form-label">Confirm Password*</label>
-                            <input type="password" 
-                                   class="form-control {% if form.password2.errors %}is-invalid{% endif %}" 
-                                   id="password2" 
-                                   name="password2"
-                                   required>
+                            <input type="password" class="form-control {% if form.password2.errors %}is-invalid{% endif %}" id="password2" name="password2" required>
                             {% if form.password2.errors %}
-                                <div class="invalid-feedback">{{ form.password2.errors|join:", " }}</div>
+                            <div class="invalid-feedback">
+                                {{ form.password2.errors|join:", " }}
+                            </div>
                             {% endif %}
                         </div>
 
-                        <!-- Age -->
                         <div class="mb-3">
                             <label for="age" class="form-label">Age*</label>
-                            <input type="number" 
-                                   class="form-control {% if form.age.errors %}is-invalid{% endif %}" 
-                                   id="age" 
-                                   name="age" 
-                                   value="{{ form.age.value|default:'' }}"
-                                   required>
+                            <input type="number" class="form-control {% if form.age.errors %}is-invalid{% endif %}" id="age" name="age" required>
                             {% if form.age.errors %}
-                                <div class="invalid-feedback">{{ form.age.errors|join:", " }}</div>
+                            <div class="invalid-feedback">
+                                {{ form.age.errors|join:", " }}
+                            </div>
                             {% endif %}
                         </div>
 
-                        <!-- Mobile -->
                         <div class="mb-3">
                             <label for="mobile" class="form-label">Mobile*</label>
-                            <input type="tel" 
-                                   class="form-control {% if form.mobile.errors %}is-invalid{% endif %}" 
-                                   id="mobile" 
-                                   name="mobile" 
-                                   value="{{ form.mobile.value|default:'' }}"
-                                   placeholder="+1234567890"
-                                   required>
+                            <input type="text" class="form-control {% if form.mobile.errors %}is-invalid{% endif %}" id="mobile" name="mobile" placeholder="+1234567890" required>
                             {% if form.mobile.errors %}
-                                <div class="invalid-feedback">{{ form.mobile.errors|join:", " }}</div>
+                            <div class="invalid-feedback">
+                                {{ form.mobile.errors|join:", " }}
+                            </div>
                             {% endif %}
                         </div>
 
-                        <!-- Country of Citizenship -->
                         <div class="mb-3">
                             <label for="country_of_citizenship" class="form-label">Country of Citizenship*</label>
-                            <input type="text" 
-                                   class="form-control {% if form.country_of_citizenship.errors %}is-invalid{% endif %}" 
-                                   id="country_of_citizenship" 
-                                   name="country_of_citizenship" 
-                                   value="{{ form.country_of_citizenship.value|default:'' }}"
-                                   required>
+                            <input type="text" class="form-control {% if form.country_of_citizenship.errors %}is-invalid{% endif %}" id="country_of_citizenship" name="country_of_citizenship" required>
                             {% if form.country_of_citizenship.errors %}
-                                <div class="invalid-feedback">{{ form.country_of_citizenship.errors|join:", " }}</div>
+                            <div class="invalid-feedback">
+                                {{ form.country_of_citizenship.errors|join:", " }}
+                            </div>
                             {% endif %}
                         </div>
 
-                        <!-- Language Preferred -->
                         <div class="mb-3">
                             <label for="language_preferred" class="form-label">Preferred Language*</label>
-                            <input type="text" 
-                                   class="form-control {% if form.language_preferred.errors %}is-invalid{% endif %}" 
-                                   id="language_preferred" 
-                                   name="language_preferred" 
-                                   value="{{ form.language_preferred.value|default:'' }}"
-                                   required>
+                            <input type="text" class="form-control {% if form.language_preferred.errors %}is-invalid{% endif %}" id="language_preferred" name="language_preferred" required>
                             {% if form.language_preferred.errors %}
-                                <div class="invalid-feedback">{{ form.language_preferred.errors|join:", " }}</div>
+                            <div class="invalid-feedback">
+                                {{ form.language_preferred.errors|join:", " }}
+                            </div>
                             {% endif %}
                         </div>
 
-                        <!-- COVID Vaccination Status -->
                         <div class="mb-3">
-                            <label class="form-label d-block">COVID-19 Vaccination Status*</label>
+                            <label class="form-label">COVID-19 Vaccination Status*</label>
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" 
-                                       type="radio" 
-                                       name="covid_vaccination_status" 
-                                       id="vaccinated" 
-                                       value="True" 
-                                       {% if form.covid_vaccination_status.value == True %}checked{% endif %} 
-                                       required>
+                                <input class="form-check-input" type="radio" name="covid_vaccination_status" id="vaccinated" value="true">
                                 <label class="form-check-label" for="vaccinated">Vaccinated</label>
                             </div>
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" 
-                                       type="radio" 
-                                       name="covid_vaccination_status" 
-                                       id="not_vaccinated" 
-                                       value="False" 
-                                       {% if form.covid_vaccination_status.value == False %}checked{% endif %}>
+                                <input class="form-check-input" type="radio" name="covid_vaccination_status" id="not_vaccinated" value="false">
                                 <label class="form-check-label" for="not_vaccinated">Not Vaccinated</label>
                             </div>
                             {% if form.covid_vaccination_status.errors %}
-                                <div class="invalid-feedback d-block">{{ form.covid_vaccination_status.errors|join:", " }}</div>
-                            {% endif %}
-                        </div>
-
-                        <!-- Credit Card -->
-                        <div class="mb-3">
-                            <label for="credit_card" class="form-label">Credit Card*</label>
-                            <input type="text" 
-                                   class="form-control {% if form.credit_card.errors %}is-invalid{% endif %}" 
-                                   id="credit_card" 
-                                   name="credit_card" 
-                                   value="{{ form.credit_card.value|default:'' }}"
-                                   placeholder="XXXX-XXXX-XXXX-XXXX"
-                                   required>
-                            {% if form.credit_card.errors %}
-                                <div class="invalid-feedback">{{ form.credit_card.errors|join:", " }}</div>
-                            {% endif %}
-                        </div>
-
-                        <!-- Service Provider -->
-                         <div class="mb-3">
-                            <div class = "form-check">
-                                <input type="checkbox" 
-                                        class="form-check-input {% if form.is_service_provider.errors %}is-invalid{% endif %}" 
-                                        id="is_service_provider" 
-                                        name="is_service_provider" 
-                                        {% if form.is_service_provider.value %}checked{% endif %}>
-                                <label class="form-check-label" for="is_service_provider">Register as Service Provider</label>
-                                {% if form.is_service_provider.errors %}
-                                    <div class="invalid-feedback">{{ form.is_service_provider.errors|join:", " }}</div>
-                                {% endif %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.covid_vaccination_status.errors|join:", " }}
                             </div>
-                         </div>
+                            {% endif %}
+                        </div>
 
-                         <!-- Trade -->
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="is_service_provider" name="is_service_provider">
+                            <label class="form-check-label" for="is_service_provider">Register as Service Provider</label>
+                            {% if form.is_service_provider.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.is_service_provider.errors|join:", " }}
+                            </div>
+                            {% endif %}
+                        </div>
+
                         <div class="mb-3 service-provider-field" style="display: none;">
                             <label for="trade" class="form-label">Trade</label>
-                            <input type="text" 
-                                    class="form-control {% if form.trade.errors %}is-invalid{% endif %}" 
-                                    id="trade" 
-                                    name="trade" 
-                                    value="{{ form.trade.value|default:'' }}">
+                            <input type="text" class="form-control {% if form.trade.errors %}is-invalid{% endif %}" id="trade" name="trade">
                             {% if form.trade.errors %}
-                                <div class="invalid-feedback">{{ form.trade.errors|join:", " }}</div>
+                            <div class="invalid-feedback">
+                                {{ form.trade.errors|join:", " }}
+                            </div>
                             {% endif %}
                         </div>
 
-                        <!-- Profession -->
                         <div class="mb-3 service-provider-field" style="display: none;">
                             <label for="profession" class="form-label">Profession</label>
-                            <input type="text" 
-                                    class="form-control {% if form.profession.errors %}is-invalid{% endif %}" 
-                                    id="profession" 
-                                    name="profession" 
-                                    value="{{ form.profession.value|default:'' }}">
+                            <input type="text" class="form-control {% if form.profession.errors %}is-invalid{% endif %}" id="profession" name="profession">
                             {% if form.profession.errors %}
-                                <div class="invalid-feedback">{{ form.profession.errors|join:", " }}</div>
+                            <div class="invalid-feedback">
+                                {{ form.profession.errors|join:", " }}
+                            </div>
                             {% endif %}
                         </div>
 
@@ -220,58 +175,33 @@
                         </div>
                     </form>
                 </div>
+
                 <div class="card-footer text-center">
-                    <p class="mb-0">Already have an account? <a href="{% url 'login' %}">Login here</a></p>
+                    Already have an account? <a href="{% url 'login' %}">Login here</a>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Add this script at the end of the file -->
 <script>
-// Form validation
-(function () {
-    'use strict'
-    var forms = document.querySelectorAll('.needs-validation')
-    Array.prototype.slice.call(forms)
-        .forEach(function (form) {
-            form.addEventListener('submit', function (event) {
-                if (!form.checkValidity()) {
-                    event.preventDefault()
-                    event.stopPropagation()
-                }
-                form.classList.add('was-validated')
-            }, false)
-        })
-})()
-
-// Credit card formatting
-document.getElementById('credit_card').addEventListener('input', function(e) {
-    let value = e.target.value.replace(/\D/g, '');
-    if (value.length > 0) {
-        value = value.match(new RegExp('.{1,4}', 'g')).join('-');
-    }
-    e.target.value = value;
-});
-
-// Handle service provider fields visibility
-document.getElementById('is_service_provider').addEventListener('change', function(e) {
-    const serviceProviderFields = document.querySelectorAll('.service-provider-field');
-    serviceProviderFields.forEach(field => {
-        field.style.display = e.target.checked ? 'block' : 'none';
-        const input = field.querySelector('input');
-        if (input) {
-            input.required = e.target.checked;
+    document.addEventListener('DOMContentLoaded', function() {
+        const serviceProviderCheckbox = document.querySelector('input[name="is_service_provider"]');
+        const serviceProviderFields = document.querySelectorAll('.service-provider-field');
+        
+        // Function to toggle visibility of service provider fields
+        function toggleServiceProviderFields() {
+            serviceProviderFields.forEach(field => {
+                field.style.display = serviceProviderCheckbox.checked ? 'block' : 'none';
+            });
         }
+        
+        // Add event listener to checkbox
+        serviceProviderCheckbox.addEventListener('change', toggleServiceProviderFields);
+        
+        // Initial check in case the checkbox is pre-checked
+        toggleServiceProviderFields();
     });
-});
-
-// Initialize fields visibility on page load
-document.addEventListener('DOMContentLoaded', function() {
-    const checkbox = document.getElementById('is_service_provider');
-    const event = new Event('change');
-    checkbox.dispatchEvent(event);
-});
 </script>
+
 {% endblock %}

@@ -5,7 +5,16 @@ from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 
 class RegistrationForm(UserCreationForm):
-    # Username validation
+    first_name = forms.CharField(
+        max_length=150,
+        required=True,
+    )
+    
+    last_name = forms.CharField(
+        max_length=150,
+        required=True,
+    )
+
     username = forms.CharField(
         min_length=4,
         max_length=150,
@@ -15,13 +24,59 @@ class RegistrationForm(UserCreationForm):
                 message='Username must contain only letters, numbers, and underscores',
                 code='invalid_username'
             ),
-        ]
+        ],
+        help_text='Only letters, numbers, and underscores allowed.'
     )
 
-    trade = forms.CharField(max_length=50, required=False)
-    profession = forms.CharField(max_length=50, required=False)
+    age = forms.IntegerField(
+        required=True,
+    )
 
-    # Password validation
+    mobile = forms.CharField(
+        validators=[
+            RegexValidator(
+                regex=r'^\+?1?\d{9,15}$',
+                message="Phone number must be entered in the format: '+999999999'."
+            )
+        ],
+        required=True,
+    )
+
+    country_of_citizenship = forms.CharField(
+        max_length=100,
+        required=True,
+    )
+
+    language_preferred = forms.CharField(
+        max_length=50,
+        required=True,
+    )
+
+    COVID_VACCINATION_CHOICES = [
+        ('vaccinated', 'Vaccinated'),
+        ('not_vaccinated', 'Not Vaccinated'),
+    ]
+    covid_vaccination_status = forms.ChoiceField(
+        choices=COVID_VACCINATION_CHOICES,
+        widget=forms.RadioSelect,
+        required=True,
+    )
+
+    is_service_provider = forms.BooleanField(
+        required=False,
+        label='Register as Service Provider'
+    )
+
+    trade = forms.CharField(
+        max_length=50,
+        required=False,
+    )
+
+    profession = forms.CharField(
+        max_length=50,
+        required=False,
+    )
+
     def clean_password1(self):
         password = self.cleaned_data.get('password1')
         if len(password) < 8:
@@ -35,22 +90,7 @@ class RegistrationForm(UserCreationForm):
         if not any(char in '!@#$%^&*()' for char in password):
             raise ValidationError('Password must contain at least one special character')
         return password
-    
-    def clean_mobile(self):
-        mobile = self.cleaned_data.get('mobile')
-        return forms.CharField(validators=[
-            RegexValidator(regex=r'^\+?1?\d{9,15}$', 
-            message="Phone number must be entered in the format: '+999999999'.")
-        ]).clean(mobile)
-    
-    def clean_credit_card(self):
-        credit_card = self.cleaned_data.get('credit_card')
-        # Remove any non-digit characters and validate
-        cleaned_cc = ''.join(filter(str.isdigit, credit_card))
-        if not cleaned_cc.isdigit() or len(cleaned_cc) not in [15, 16]:
-            raise ValidationError('Invalid credit card number')
-        return cleaned_cc
-    
+
     def clean(self):
         cleaned_data = super().clean()
         is_service_provider = cleaned_data.get('is_service_provider')
@@ -64,13 +104,24 @@ class RegistrationForm(UserCreationForm):
                 self.add_error('profession', 'Profession is required for service providers')
 
         return cleaned_data
-    
+
     class Meta:
         model = User
-        fields = ['username', 'password1', 'password2', 'age', 'mobile', 
-                  'country_of_citizenship', 'language_preferred', 
-                  'covid_vaccination_status', 'credit_card', 
-                  'trade', 'profession', 'is_service_provider']
+        fields = [
+            'first_name',
+            'last_name',
+            'username',
+            'password1',
+            'password2',
+            'age',
+            'mobile',
+            'country_of_citizenship',
+            'language_preferred',
+            'covid_vaccination_status',
+            'is_service_provider',
+            'trade',
+            'profession',
+        ]
 
 class LoginForm(forms.Form):
     username = forms.CharField(max_length=100)

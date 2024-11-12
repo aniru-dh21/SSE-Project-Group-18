@@ -7,7 +7,6 @@ class User(AbstractUser):
     country_of_citizenship = models.CharField(max_length=100)
     language_preferred = models.CharField(max_length=50)
     covid_vaccination_status = models.BooleanField(default=False)
-    credit_card = models.CharField(max_length=20)
     trade = models.CharField(max_length=50)
     profession = models.CharField(max_length=50)
     is_service_provider = models.BooleanField(default=False)
@@ -27,7 +26,6 @@ class User(AbstractUser):
         help_text='Specific permissions for this user.',
         verbose_name='user permissions'
     )
-
 class Service(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
