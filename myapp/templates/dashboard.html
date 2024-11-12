@@ -86,6 +86,65 @@
                 </div>
             </div>
         </div>
+
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">My Inspections</h5>
+                <a href="{% url 'book_inspection' %}" class="btn btn-primary btn-sm">Book New Inspection</a>
+            </div>
+            <div class="card-body">
+                {% if user_inspections %}
+                    {% for inspection in user_inspections %}
+                    <div class="inspection-card mb-3 border p-3 rounded">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="mb-2">House Inspection</h6>
+                                <p class="mb-1"><small>Booked Date: {{ inspection.created_at|date:"M d, Y" }}</small></p>
+                                <p class="mb-1"><small>Preferred Date: {{ inspection.preferred_date|date:"M d, Y" }}</small></p>
+                                <span class="badge {% if inspection.status == 'pending' %}bg-warning{% elif inspection.status == 'in_progress' %}bg-primary{% else %}bg-success{% endif %}">
+                                    {{ inspection.get_status_display }}
+                                </span>
+                            </div>
+                            {% if inspection.status == 'completed' %}
+                                <a href="{% url 'view_inspection_recommendations' inspection.id %}" class="btn btn-sm btn-primary">View Results</a>
+                            {% endif %}
+                        </div>
+        
+                        {% if inspection.status == 'completed' and inspection.findings.exists %}
+                        <div class="mt-3">
+                            <h6>Inspector's Findings:</h6>
+                            {% for finding in inspection.findings.all %}
+                            <div class="finding-item border-left pl-3 mb-2">
+                                <p class="mb-1">
+                                    <strong>{{ finding.location_in_house }}</strong> - 
+                                    <span class="badge {% if finding.urgency_level == 'critical' %}bg-danger{% elif finding.urgency_level == 'high' %}bg-warning{% else %}bg-info{% endif %}">
+                                        {{ finding.get_urgency_level_display }}
+                                    </span>
+                                </p>
+                                <p class="mb-1"><small>{{ finding.issue_description }}</small></p>
+                                {% if finding.recommended_services.exists %}
+                                <div class="recommended-services mt-2">
+                                    <p class="mb-1"><small><strong>Recommended Services:</strong></small></p>
+                                    {% for service in finding.recommended_services.all %}
+                                    <div class="service-item">
+                                        <span class="badge bg-secondary">{{ service.name }}</span>
+                                        <small>- ${{ service.price }}</small>
+                                        <a href="{% url 'book_service' service.id %}" class="btn btn-sm btn-outline-primary ml-2">Book Service</a>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-center mb-0">No inspections booked yet.</p>
+                {% endif %}
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

@@ -123,16 +123,35 @@ def dashboard(request):
             service__in=provided_services
         ).select_related('user', 'service').order_by('-booking_date')
         
+        # Add inspection assignments
+        assigned_inspections = InspectionService.objects.filter(
+            inspector=request.user
+        ).prefetch_related(
+            'findings',
+            'findings__recommended_services'
+        ).order_by('-created_at')
+        
         context.update({
             'provided_services': provided_services,
             'service_bookings': service_bookings,
+            'assigned_inspections': assigned_inspections,
         })
         return render(request, 'dashboard_provider.html', context)
     else:
         # Regular user dashboard
         user_bookings = Booking.objects.filter(user=request.user).select_related('service')
+        
+        # Add user's inspections
+        user_inspections = InspectionService.objects.filter(
+            user=request.user
+        ).prefetch_related(
+            'findings',
+            'findings__recommended_services'
+        ).order_by('-created_at')
+        
         context.update({
             'bookings': user_bookings,
+            'user_inspections': user_inspections,
         })
         return render(request, 'dashboard.html', context)
 
