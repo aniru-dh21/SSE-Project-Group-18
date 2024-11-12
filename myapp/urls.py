@@ -26,6 +26,7 @@ urlpatterns = [
     path('inspections/<int:inspection_id>/accept/', views.accept_inspection, name='accept_inspection'),
     path('inspections/<int:inspection_id>/submit-results/', views.submit_inspection_results, name='submit_inspection_results'),
     path('inspection/<int:inspection_id>/recommendations/', views.view_inspection_recommendations, name='view_inspection_recommendations'),
+    path('inspection/<int:inspection_id>/recommendations/', views.view_inspection_recommendations, name='view_inspection_recommendations'),
     path('success/', views.success_view, name='success'),
     path('cancel/', views.cancel_view, name='cancel'),
     path('stripe_webhook/', views.stripe_webhook, name='stripe_webhook'),

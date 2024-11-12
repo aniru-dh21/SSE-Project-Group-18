@@ -561,31 +561,8 @@ def submit_inspection_results(request, inspection_id):
         'available_services': available_services
     })
 
-# Add new view for clients to view recommendations
-@login_required
 def view_inspection_recommendations(request, inspection_id):
-    inspection = get_object_or_404(
-        InspectionService, 
-        id=inspection_id,
-        user=request.user,
-        status='completed'
-    )
-    
-    findings = inspection.findings.all().prefetch_related('recommended_services')
-    
-    # Group recommendations by priority
-    recommendations = {
-        'immediate': [],
-        'soon': [],
-        'future': [],
-        'optional': []
-    }
-    
-    for finding in findings:
-        recommendations[finding.recommendation_priority].append(finding)
-    
+    inspection = get_object_or_404(InspectionService, id=inspection_id, user=request.user)
     return render(request, 'inspection/view_recommendations.html', {
-        'inspection': inspection,
-        'recommendations': recommendations,
-        'total_findings': findings.count()
+        'inspection': inspection
     })

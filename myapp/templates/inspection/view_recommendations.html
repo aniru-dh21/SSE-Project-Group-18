@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Inspection Recommendations{% endblock %}
+{% block content %}
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Inspection Results and Recommendations</h4>
+                    <p class="text-muted mb-0">Inspection Date: {{ inspection.preferred_date|date:"M d, Y" }}</p>
+                </div>
+                <div class="card-body">
+                    {% if inspection.findings.exists %}
+                        {% for finding in inspection.findings.all %}
+                            <div class="finding-card mb-4 border rounded p-3">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <h5 class="mb-0">{{ finding.location_in_house }}</h5>
+                                    <span class="badge {% if finding.urgency_level == 'critical' %}bg-danger{% elif finding.urgency_level == 'high' %}bg-warning{% elif finding.urgency_level == 'medium' %}bg-info{% else %}bg-secondary{% endif %}">
+                                        {{ finding.get_urgency_level_display }}
+                                    </span>
+                                </div>
+                                
+                                <div class="finding-details">
+                                    <p class="mb-2"><strong>Issue Description:</strong><br>
+                                    {{ finding.issue_description }}</p>
+                                    
+                                    {% if finding.provider_feedback %}
+                                        <p class="mb-2"><strong>Inspector's Feedback:</strong><br>
+                                        {{ finding.provider_feedback }}</p>
+                                    {% endif %}
+                                    
+                                    <div class="row mt-3">
+                                        <div class="col-md-6">
+                                            <p class="mb-2"><strong>Estimated Cost:</strong> ${{ finding.estimated_cost }}</p>
+                                            <p class="mb-2"><strong>Timeline:</strong> {{ finding.estimated_timeline }}</p>
+                                            <p class="mb-2"><strong>Priority:</strong> {{ finding.get_recommendation_priority_display }}</p>
+                                        </div>
+                                    </div>
+                                    
+                                    {% if finding.recommended_services.exists %}
+                                        <div class="recommended-services mt-3">
+                                            <h6>Recommended Services:</h6>
+                                            <div class="row">
+                                                {% for service in finding.recommended_services.all %}
+                                                    <div class="col-md-6 mb-2">
+                                                        <div class="service-card border p-2 rounded">
+                                                            <div class="d-flex justify-content-between align-items-center">
+                                                                <div>
+                                                                    <strong>{{ service.name }}</strong>
+                                                                    <br>
+                                                                    <small class="text-muted">${{ service.price }}</small>
+                                                                </div>
+                                                                <a href="{% url 'book_service' service.id %}" class="btn btn-sm btn-primary">Book Service</a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="alert alert-info">
+                            No findings have been recorded for this inspection yet.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
