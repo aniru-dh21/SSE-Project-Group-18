@@ -125,20 +125,24 @@
 
                         <div class="mb-3">
                             <label class="form-label">COVID-19 Vaccination Status*</label>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="covid_vaccination_status" id="vaccinated" value="true">
-                                <label class="form-check-label" for="vaccinated">Vaccinated</label>
+                            <div>
+                                {% for value, text in form.covid_vaccination_status.field.choices %}
+                                <div class="form-check form-check-inline">
+                                    <input type="radio" 
+                                           name="{{ form.covid_vaccination_status.name }}"
+                                           value="{{ value }}"
+                                           id="id_covid_status_{{ value }}"
+                                           class="form-check-input {% if form.covid_vaccination_status.errors %}is-invalid{% endif %}"
+                                           {% if form.covid_vaccination_status.value == value %}checked{% endif %}>
+                                    <label class="form-check-label" for="id_covid_status_{{ value }}">{{ text }}</label>
+                                </div>
+                                {% endfor %}
+                                {% if form.covid_vaccination_status.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.covid_vaccination_status.errors|join:", " }}
+                                </div>
+                                {% endif %}
                             </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="covid_vaccination_status" id="not_vaccinated" value="false">
-                                <label class="form-check-label" for="not_vaccinated">Not Vaccinated</label>
-                            </div>
-                            {% if form.covid_vaccination_status.errors %}
-                            <div class="invalid-feedback d-block">
-                                {{ form.covid_vaccination_status.errors|join:", " }}
-                            </div>
-                            {% endif %}
-                        </div>
 
                         <div class="mb-3 form-check">
                             <input type="checkbox" class="form-check-input" id="is_service_provider" name="is_service_provider">

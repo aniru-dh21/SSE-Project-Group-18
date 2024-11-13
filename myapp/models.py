@@ -6,7 +6,14 @@ class User(AbstractUser):
     mobile = models.CharField(max_length=15)
     country_of_citizenship = models.CharField(max_length=100)
     language_preferred = models.CharField(max_length=50)
-    covid_vaccination_status = models.BooleanField(default=False)
+    covid_vaccination_status = models.CharField(
+        max_length=20,
+        choices=[
+            ('vaccinated', 'Vaccinated'),
+            ('not_vaccinated', 'Not Vaccinated'),
+        ],
+        default='not_vaccinated'
+    )
     trade = models.CharField(max_length=50)
     profession = models.CharField(max_length=50)
     is_service_provider = models.BooleanField(default=False)
