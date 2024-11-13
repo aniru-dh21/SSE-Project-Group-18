@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db import transaction
 
-from .forms import RegistrationForm, LoginForm, ServicePackageForm, CustomizePackageForm, InspectionServiceForm, InspectionResultForm, InspectionRecommendationForm, ServiceManagementForm
+from .forms import RegistrationForm, LoginForm, ServicePackageForm, CustomizePackageForm, InspectionServiceForm, InspectionResultForm, InspectionRecommendationForm, ServiceManagementForm, AutomatedPackageGeneratorForm
 from .models import Service, Booking, ServicePackage, PackageService, InspectionService
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
@@ -576,3 +576,26 @@ def view_inspection_recommendations(request, inspection_id):
     return render(request, 'inspection/view_recommendations.html', {
         'inspection': inspection
     })
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def generate_automated_packages(request):
+    if request.method == 'POST':
+        form = AutomatedPackageGeneratorForm(request.POST)
+        if form.is_valid() and form.cleaned_data['confirm_generation']:
+            try:
+                packages_created = ServicePackage.generate_automated_packages()
+                messages.success(
+                    request, 
+                    f'Successfully generated {packages_created} new service packages!'
+                )
+                return redirect('package_list')
+            except Exception as e:
+                messages.error(
+                    request, 
+                    f'Error generating packages: {str(e)}'
+                )
+    else:
+        form = AutomatedPackageGeneratorForm()
+    
+    return render(request, 'packages/generate_packages.html', {'form': form})

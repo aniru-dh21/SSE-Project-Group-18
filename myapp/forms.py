@@ -230,3 +230,10 @@ class ServiceManagementForm(forms.ModelForm):
                 raise forms.ValidationError("Only JPEG and PNG files are allowed")
         
         return photo
+    
+class AutomatedPackageGeneratorForm(forms.Form):
+    confirm_generation = forms.BooleanField(
+        required=True,
+        label='Confirm automatic package generation',
+        help_text='This will create new packages based on available services.'
+    )

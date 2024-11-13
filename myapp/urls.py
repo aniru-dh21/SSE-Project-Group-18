@@ -32,4 +32,5 @@ urlpatterns = [
     path('success/', views.success_view, name='success'),
     path('cancel/', views.cancel_view, name='cancel'),
     path('stripe_webhook/', views.stripe_webhook, name='stripe_webhook'),
+    path('packages/generate/', views.generate_automated_packages, name='generate_packages'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

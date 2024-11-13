@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.db import transaction
 
 class User(AbstractUser):
     age = models.IntegerField(null=True, blank=True)
@@ -89,7 +90,71 @@ class ServicePackage(models.Model):
     discount_percentage = models.DecimalField(max_digits=5, decimal_places=2)
     is_customizable = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)  
-    updated_at = models.DateTimeField(auto_now=True, null=True)      
+    updated_at = models.DateTimeField(auto_now=True, null=True)   
+
+    @classmethod
+    def generate_automated_packages(cls):
+        """
+        Generates automated packages by combining services in pairs and triplets
+        with optimized discounts based on total value
+        """
+        from itertools import combinations
+        
+        # Get all active services
+        services = Service.objects.filter(is_available=True)
+        
+        # Generate combinations of 2 and 3 services
+        packages_created = 0
+        for size in [2, 3]:
+            service_combinations = combinations(services, size)
+            
+            for combo in service_combinations:
+                # Calculate total price of services
+                total_price = sum(service.price for service in combo)
+                
+                # Skip if package with these exact services already exists
+                existing_package = cls.objects.filter(services__in=combo).distinct()
+                if existing_package.count() == len(combo):
+                    continue
+                
+                # Calculate discount based on total price
+                if total_price < 100:
+                    discount = 10
+                elif total_price < 200:
+                    discount = 15
+                else:
+                    discount = 20
+                
+                # Create package name and description
+                service_names = [s.name for s in combo]
+                package_name = f"{' & '.join(service_names)} Package"
+                description = f"Save {discount}% on this combination of {len(combo)} services: {', '.join(service_names)}"
+                
+                # Create the package
+                try:
+                    with transaction.atomic():
+                        package = cls.objects.create(
+                            name=package_name,
+                            description=description,
+                            base_price=0.00,
+                            discount_percentage=discount,
+                            is_customizable=True
+                        )
+                        
+                        # Add services to package
+                        for service in combo:
+                            PackageService.objects.create(
+                                package=package,
+                                service=service,
+                                is_optional=False
+                            )
+                        
+                        packages_created += 1
+                except Exception as e:
+                    print(f"Error creating package {package_name}: {str(e)}")
+                    continue
+                    
+        return packages_created   
 
     class Meta:
         db_table = 'myapp_servicepackage'
