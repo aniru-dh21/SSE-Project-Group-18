@@ -1,35 +1,38 @@
 {% extends "base.html" %}
 {% block content %}
-
 <div class="container mt-4">
     <h2>Manage Services</h2>
 
-    <!-- Add New Service Form -->
     <div class="card mt-4">
         <div class="card-header">
-            <h5 class="mb-0">Add New Service</h5>
+            <h5 class="mb-0" id="add-new-service">Add New Service</h5>
         </div>
         <div class="card-body">
-            <form method="POST" action="{% url 'manage_services' %}">
+            <form method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="mb-3">
                     <label for="name" class="form-label">Service Name</label>
-                    <input type="text" class="form-control" id="name" name="name" required>
+                    {{ form.name }}
                 </div>
                 <div class="mb-3">
                     <label for="description" class="form-label">Description</label>
-                    <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                    {{ form.description }}
                 </div>
                 <div class="mb-3">
                     <label for="price" class="form-label">Price ($)</label>
-                    <input type="number" class="form-control" id="price" name="price" step="0.01" required>
+                    {{ form.price }}
                 </div>
                 <div class="mb-3">
                     <label for="service_area" class="form-label">Service Area</label>
-                    <input type="text" class="form-control" id="service_area" name="service_area">
+                    {{ form.service_area }}
+                </div>
+                <div class="mb-3">
+                    <label for="photo" class="form-label">Service Photo</label>
+                    {{ form.photo }}
+                    <div class="form-text">Upload a single photo (JPEG or PNG, max 5MB)</div>
                 </div>
                 <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" id="is_available" name="is_available" checked>
+                    {{ form.is_available }}
                     <label class="form-check-label" for="is_available">Available for Booking</label>
                 </div>
                 <button type="submit" class="btn btn-primary">Add Service</button>
@@ -37,10 +40,9 @@
         </div>
     </div>
 
-    <!-- Existing Services List -->
     <div class="card mt-4">
         <div class="card-header">
-            <h5 class="mb-0">Your Services</h5>
+            <h5 class="mb-0" id="your-services">Your Services</h5>
         </div>
         <div class="card-body">
             {% if services %}
@@ -48,6 +50,7 @@
                 <table class="table">
                     <thead>
                         <tr>
+                            <th>Photo</th>
                             <th>Name</th>
                             <th>Price</th>
                             <th>Status</th>
@@ -57,57 +60,66 @@
                     <tbody>
                         {% for service in services %}
                         <tr>
+                            <td>
+                                {% if service.photo %}
+                                    <img src="{{ service.photo.url }}" alt="{{ service.name }}" class="img-thumbnail" style="max-width: 100px;">
+                                {% else %}
+                                    <span class="text-muted">No photo</span>
+                                {% endif %}
+                            </td>
                             <td>{{ service.name }}</td>
                             <td>${{ service.price }}</td>
+                            <td>{{ service.is_available|yesno:"Available,Not Available" }}</td>
                             <td>
-                                <form method="POST" action="{% url 'manage_services' %}" class="d-inline">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="service_id" value="{{ service.id }}">
-                                    <input type="hidden" name="action" value="toggle_status">
-                                    <button type="submit" class="btn btn-sm {% if service.is_available %}btn-success{% else %}btn-secondary{% endif %}">
-                                        {{ service.is_available|yesno:"Available,Not Available" }}
-                                    </button>
-                                </form>
-                            </td>
-                            <td>
-                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editModal{{ service.id }}">
+                                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#editModal{{ service.id }}">
                                     Edit
                                 </button>
                             </td>
                         </tr>
 
-                        <!-- Edit Modal for each service -->
+                        <!-- Edit Modal -->
                         <div class="modal fade" id="editModal{{ service.id }}" tabindex="-1" aria-labelledby="editModalLabel{{ service.id }}" aria-hidden="true">
                             <div class="modal-dialog">
                                 <div class="modal-content">
-                                    <form method="POST" action="{% url 'manage_services' %}">
+                                    <form method="POST" enctype="multipart/form-data">
                                         {% csrf_token %}
-                                        <input type="hidden" name="service_id" value="{{ service.id }}">
                                         <input type="hidden" name="action" value="update">
+                                        <input type="hidden" name="service_id" value="{{ service.id }}">
+                                        
                                         <div class="modal-header">
                                             <h5 class="modal-title" id="editModalLabel{{ service.id }}">Edit Service</h5>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
                                             <div class="mb-3">
-                                                <label for="edit_name{{ service.id }}" class="form-label">Service Name</label>
-                                                <input type="text" class="form-control" id="edit_name{{ service.id }}" name="name" value="{{ service.name }}" required>
+                                                <label class="form-label">Service Name</label>
+                                                <input type="text" class="form-control" name="name" value="{{ service.name }}" required>
                                             </div>
                                             <div class="mb-3">
-                                                <label for="edit_description{{ service.id }}" class="form-label">Description</label>
-                                                <textarea class="form-control" id="edit_description{{ service.id }}" name="description" rows="3" required>{{ service.description }}</textarea>
+                                                <label class="form-label">Description</label>
+                                                <textarea class="form-control" name="description" rows="4" required>{{ service.description }}</textarea>
                                             </div>
                                             <div class="mb-3">
-                                                <label for="edit_price{{ service.id }}" class="form-label">Price ($)</label>
-                                                <input type="number" class="form-control" id="edit_price{{ service.id }}" name="price" step="0.01" value="{{ service.price }}" required>
+                                                <label class="form-label">Price ($)</label>
+                                                <input type="number" class="form-control" name="price" value="{{ service.price }}" step="0.01" required>
                                             </div>
                                             <div class="mb-3">
-                                                <label for="edit_service_area{{ service.id }}" class="form-label">Service Area</label>
-                                                <input type="text" class="form-control" id="edit_service_area{{ service.id }}" name="service_area" value="{{ service.service_area }}">
+                                                <label class="form-label">Service Area</label>
+                                                <input type="text" class="form-control" name="service_area" value="{{ service.service_area }}">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Service Photo</label>
+                                                {% if service.photo %}
+                                                    <div class="mb-2">
+                                                        <img src="{{ service.photo.url }}" alt="Current photo" class="img-thumbnail" style="max-width: 200px;">
+                                                    </div>
+                                                {% endif %}
+                                                <input type="file" class="form-control" name="photo" accept="image/*">
+                                                <div class="form-text">Upload a new photo to replace the existing one (JPEG or PNG, max 5MB)</div>
                                             </div>
                                             <div class="mb-3 form-check">
-                                                <input type="checkbox" class="form-check-input" id="edit_is_available{{ service.id }}" name="is_available" {% if service.is_available %}checked{% endif %}>
-                                                <label class="form-check-label" for="edit_is_available{{ service.id }}">Available for Booking</label>
+                                                <input type="checkbox" class="form-check-input" name="is_available" {% if service.is_available %}checked{% endif %}>
+                                                <label class="form-check-label">Available for Booking</label>
                                             </div>
                                         </div>
                                         <div class="modal-footer">
@@ -123,10 +135,9 @@
                 </table>
             </div>
             {% else %}
-            <p>No services added yet.</p>
+            <p class="text-muted">No services added yet.</p>
             {% endif %}
         </div>
     </div>
 </div>
-
 {% endblock %}

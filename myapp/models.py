@@ -45,6 +45,12 @@ class Service(models.Model):
     provider = models.ForeignKey(User, on_delete=models.CASCADE, related_name='provided_services', null=True)
     is_available = models.BooleanField(default=True)
     service_area = models.CharField(max_length=200, blank=True)
+    photo = models.ImageField(
+        upload_to='service_photos/',
+        null=True,
+        blank=True,
+        help_text="Upload a single photo for your service"
+    )
 
     def __str__(self):
         return self.name

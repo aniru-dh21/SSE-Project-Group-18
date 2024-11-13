@@ -5,14 +5,15 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db import transaction
 
-from .forms import RegistrationForm, LoginForm, ServicePackageForm, CustomizePackageForm, InspectionServiceForm, InspectionResultForm, InspectionRecommendationForm
-from .models import User, Service, Booking, ServicePackage, PackageService, InspectionService, InspectionFindings 
+from .forms import RegistrationForm, LoginForm, ServicePackageForm, CustomizePackageForm, InspectionServiceForm, InspectionResultForm, InspectionRecommendationForm, ServiceManagementForm
+from .models import Service, Booking, ServicePackage, PackageService, InspectionService
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import stripe # type: ignore
 import bleach
-from django.utils.html import escape
 from django.http import HttpResponseForbidden
+import os
+from django.core.files.storage import default_storage
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -372,39 +373,48 @@ def manage_services(request):
         service_id = request.POST.get('service_id')
         
         if action == 'toggle_status':
-            # Handle status toggle
             service = get_object_or_404(Service, id=service_id, provider=request.user)
             service.is_available = not service.is_available
             service.save()
             messages.success(request, f'Service status updated successfully!')
             
         elif action == 'update':
-            # Handle service update
             service = get_object_or_404(Service, id=service_id, provider=request.user)
-            service.name = request.POST.get('name')
-            service.description = request.POST.get('description')
-            service.price = request.POST.get('price')
-            service.is_available = request.POST.get('is_available') == 'on'
-            service.service_area = request.POST.get('service_area')
-            service.save()
-            messages.success(request, f'Service updated successfully!')
+            form = ServiceManagementForm(
+                request.POST, 
+                request.FILES,
+                instance=service
+            )
+            
+            if form.is_valid():
+                # If there's an existing photo and a new one is uploaded, delete the old one
+                if service.photo and 'photo' in request.FILES:
+                    if os.path.isfile(service.photo.path):
+                        default_storage.delete(service.photo.path)
+                
+                form.save()
+                messages.success(request, f'Service updated successfully!')
+            else:
+                messages.error(request, 'Please correct the errors below.')
             
         else:
-            # Handle new service creation
-            Service.objects.create(
-                provider=request.user,
-                name=request.POST.get('name'),
-                description=request.POST.get('description'),
-                price=request.POST.get('price'),
-                is_available=request.POST.get('is_available', False) == 'on',
-                service_area=request.POST.get('service_area')
-            )
-            messages.success(request, 'New service added successfully!')
+            form = ServiceManagementForm(request.POST, request.FILES)
+            if form.is_valid():
+                service = form.save(commit=False)
+                service.provider = request.user
+                service.save()
+                messages.success(request, 'New service added successfully!')
+            else:
+                messages.error(request, 'Please correct the errors below.')
             
         return redirect('manage_services')
     
     services = Service.objects.filter(provider=request.user)
-    return render(request, 'manage_services.html', {'services': services})
+    form = ServiceManagementForm()
+    return render(request, 'manage_services.html', {
+        'services': services,
+        'form': form
+    })
 
 @login_required
 @user_passes_test(lambda u: u.is_service_provider)

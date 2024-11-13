@@ -207,3 +207,26 @@ class InspectionRecommendationForm(forms.ModelForm):
             'recommended_services': forms.CheckboxSelectMultiple(),
             'estimated_cost': forms.NumberInput(attrs={'step': '0.01'})
         }
+
+class ServiceManagementForm(forms.ModelForm):
+    class Meta:
+        model = Service
+        fields = ['name', 'description', 'price', 'service_area', 'is_available', 'photo']
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 4}),
+            'price': forms.NumberInput(attrs={'step': '0.01'}),
+        }
+
+    def clean_photo(self):
+        photo = self.cleaned_data.get('photo')
+        if photo:
+            # Validate file size (limit to 5MB)
+            if photo.size > 5 * 1024 * 1024:
+                raise forms.ValidationError("Image size should not exceed 5MB")
+            
+            # Validate file type
+            allowed_types = ['image/jpeg', 'image/png', 'image/jpg']
+            if photo.content_type not in allowed_types:
+                raise forms.ValidationError("Only JPEG and PNG files are allowed")
+        
+        return photo
